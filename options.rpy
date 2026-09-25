@@ -13,7 +13,7 @@
 ##
 ## El _() que rodea la cadena de texto la señala como traducible.
 
-define config.name = _("JUEGO 1")
+define config.name = _("Re_Mercenary")
 
 
 ## Determina si el título dado más arriba se muestra en el menú principal.
@@ -37,7 +37,7 @@ define gui.about = _p("""
 ## Nombre breve del juego para ejecutables y directorios en la distribución.
 ## Debe contener solo carácteres ASCII, sin espacios, comas o puntos y coma.
 
-define build.name = "JUEGO1"
+define build.name = "Re_Mercenary"
 
 
 ## Sonidos y música ############################################################
@@ -144,7 +144,7 @@ default preferences.afm_time = 15
 ## Normalmente, este valor no debe ser modificado. Si lo es, debe ser siempre
 ## una cadena literal y no una expresión.
 
-define config.save_directory = "JUEGO1-1782423336"
+define config.save_directory = "Re_Mercenary-1786503238"
 
 
 ## Icono #######################################################################

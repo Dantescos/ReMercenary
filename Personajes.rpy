@@ -89,11 +89,7 @@ init python:
                 return danio_final
 
             def esta_vivo(self):
-                if self.__vida > 0:
-                    return True
-
-                else:
-                    return False
+                return self.__vida > 0
 
             def mostrar_info(self):
                 print("Clase: " + self.__clase + ", HP: " + str(self.__vida) + ", ATQ: " + str(self.__ataque) + ", DEF: " + str(self.__defensa) + ", MOV: " + str(self.__punto_mov))

@@ -519,6 +519,7 @@ label start:
     call screen menu_principal #OJO si quieren ver lo del tablero y demas , TIENEN QUE BORRAR ESTO, LO HICE DE PRUEBA!
 
 label inicio:
+    scene black
     # Crear heroes y enemigos
     $ heroes   = crear_heroes()
     $ enemigos = crear_enemigos()
