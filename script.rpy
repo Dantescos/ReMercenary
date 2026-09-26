@@ -233,7 +233,7 @@ label combate(heroe, enemigo):
             jump derrotado
     return
 # ============================================================
-# FUNCIÓN PARA VERIFICAR SI QUEDAN ENEMIGOS VIVOS
+# FUNCION PARA VERIFICAR SI QUEDAN ENEMIGOS VIVOS
 # ============================================================
 init python:
     def quedan_enemigos_vivos():
@@ -241,7 +241,6 @@ init python:
             if enemigo.get_visible() and enemigo.esta_vivo():
                 return True
         return False
-
 # ============================================================
 # LABEL: ARMAR EJERCITO
 # ============================================================
@@ -308,7 +307,7 @@ menu:
                 jump armar_ejercito
             else:
                 menu:
-                    "Elegí un nivel:"
+                    "Elegi un nivel:"
                     "Nivel 1 - Goblins":
                         jump nivel1
                     "Nivel 2 - Fortaleza":
@@ -335,17 +334,19 @@ label comenzar_batalla:
 # ============================================================
 label victoria_jugador:
     hide screen tablero
-    "¡FELICITACIONES! Completaste la mision y eliminaste a todas las tropas enemigas!"
+    
+    # Verificamos qué nivel se ganó y mostramos el diálogo correspondiente
+    if nivel_actual == 1:
+        call dialogo_nivel1_victoria
+    elif nivel_actual == 2:
+        "¡Nivel 2 completado!"
+        "Kazuki,Gromm y Lyra han derrotado a la fortaleza enemiga."
+    else:
+        "¡Nivel completado!"
+    
     menu:
         "¿Qué queres hacer?"
         "Jugar otro nivel":
-            # Reiniciamos el estado de batalla pero mantenemos el ejército
-            $ partida_terminada = False
-            $ heroe_actual = None  # Para que el jugador pueda seleccionar de nuevo
-            $ unidad_seleccionada = None
-            $ turno_jugador = True
-            $ texto_turno = "Tu turno"
-            # Volvemos al menú de niveles
             jump armar_ejercito
         "Reiniciar partida":
             jump reiniciar_partida
@@ -375,7 +376,7 @@ label reiniciar_partida:
     $ jugador_y = 0
     $ destino_x = 0
     $ destino_y = 0
-    # Volvemos al inicio para elegir héroe y armar ejército
+    # Volvemos al inicio para elegir heroe y armar ejercito
     jump inicio
 
 label menu_principal:
