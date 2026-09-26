@@ -19,12 +19,22 @@
 # ============================================================
 # EL PROTAGONISTA: KAZUKI TANAKA
 # ============================================================
-# Kazuki Tanaka tenia 28 anos, vivia solo, y su unico logro en la vida
-# era ser el numero 1 en el ranking global de "Kingdom Tactics",
-# un juego de estrategia por turnos que nadie jugaba fuera de Japon.
+# Kazuki Tanaka es un fracasado profesional. Tiene 28 años, vive solo, y su único logro 
+# en la vida es ser el número 1 en el ranking global de "Kingdom Tactics", un juego de 
+# estrategia por turnos que nadie juega fuera de Japón.
 #
-# Una noche, despues de derrotar al jefe final por la centesima vez,
-# salio a comprar ramen. Un camion lo atropello.
+# Una noche, después de derrotar al jefe final por la centésima vez, sale a comprar ramen.
+# Un camion lo atropella. Cuando despierta, esta en un mundo de fantasia medieval.
+# Pero no es un heroe elegido por una diosa. No tiene habilidades sobrehumanas. 
+# Desperto en el cuerpo de Sir Alaric, un comandante mercenario arruinado, alcohólico y endeudado. 
+# Su ejercito: tres soldados veteranos y un caballo cojo. Su reputación: tan mala que los campesinos le escupen al pasar.
+
+# El reino de Veridia esta en guerra contra el Imperio Oscuro. Los generales legitimos han muerto. 
+# El rey ofrece una recompensa a cualquier mercenario que pueda detener el avance enemigo. Kazuki no quiere ser héroe.
+# Quiere volver a casa. Pero para sobrevivir necesita oro. Y para ganar oro necesita ganar batallas. 
+# Por suerte, tiene algo que nadie más tiene: 3000 horas de experiencia en Kingdom Tactics.
+#
+# Una noche, despues de derrotar al jefe final por la centesima vez,salio a comprar ramen. Un camion lo atropello.
 #
 # Cuando desperto, estaba en un mundo de fantasia medieval.
 # Pero no era un heroe elegido por una diosa. No tenia habilidades
@@ -38,16 +48,17 @@
 #
 # - Lyra: Arquera elfa, la mejor del reino. Fue rescatada por Kazuki
 #   de un ataque goblin. Desconfia de los humanos, pero poco a poco
-#   empieza a confiar en el.
+#   empieza a confiar en el y enamorarse de el.
 #
 # - Gromm: Caballero enano, leal hasta la muerte. Fue soldado del
 #   ejercito real antes de la invasion. Su familia murio en el
-#   primer ataque del Imperio Oscuro.
+#   primer ataque del Imperio Oscuro. El juro vengarse del señor Oscuro
+#   y su ejercito
 #
 # - Morgana: Maga misteriosa. Nadie sabe de donde viene. Ella sabe
-#   que Kazuki es un isekai, pero no lo revela. Tiene sus propios
-#   motivos para luchar.
-
+#   que Kazuki es un humano fuera de este mundo, pero no lo revela. 
+#    Tiene sus propios motivos para luchar.
+#
 # ============================================================
 # EL ANTAGONISTA: EL SENOR OSCURO
 # ============================================================
@@ -56,6 +67,8 @@
 # a cualquiera que se interponga en su camino.
 #
 # En otra vida, pudo haber sido un gran rey. En esta, es un tirano.
+# Y esta decidido a realizar sus metas incluso si tiene que matar a Kazuki
+# y sus amigos.
 
 # ============================================================
 # SCREEN DE LORE (para mostrar en el menu)
