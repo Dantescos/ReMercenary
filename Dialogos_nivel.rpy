@@ -1,11 +1,11 @@
 # ============================================================
 # DIALOGOS DE LOS NIVELES - RE: MERCENARY
 # ============================================================
-
-# ============================================================
 # NIVEL 1: LA INVASION DE LOS GOBLINS
 # ============================================================
-
+define kazuki = Character("Kazuki", color="#88ccff")
+define lyra = Character("Lyra", color="#ff88cc")
+define gromm = Character("Gromm",color = "#008000")
 label dialogo_nivel1_inicio:
     scene black
     "Hace tres dias, los goblins atacaron la aldea de Piedra Blanca."

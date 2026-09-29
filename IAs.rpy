@@ -1,8 +1,10 @@
 init python:
+    import random
+
     class IA_Lich:
         def __init__(self):
             pass
-        def evaluar_vida_magia(self, objeto, enemigo):
+        def evaluar(self, objeto, enemigo):
             if objeto.get_vida() < objeto.get_vida_max() * 0.3:
                 if objeto.get_magia() >= 40:
                     print("Lich esta muy herido! Se cura.")
@@ -25,11 +27,10 @@ init python:
                 return objeto.regenerar_magia()
             print("Lich usa ataque basico.")
             return objeto.ataque_basico(enemigo)
-
     class IA_ArchiMago:
         def __init__(self):
             pass
-        def evalua_situacion_magia(self, objeto, enemigo):
+        def evalua(self, objeto, enemigo):
             magia = objeto.get_magia()
             x = objeto.get_x()
             y = objeto.get_y()
@@ -116,7 +117,6 @@ init python:
                         objeto.espada(enemigo)
                     else:
                         print('Error')
-
     class IA_Clerigo:
         def __init__(self):
             pass
@@ -137,7 +137,6 @@ init python:
             else:
                 print("Clerigo usa ataque basico.")
                 return objeto.ataque_basico(enemigo)
-
     class IA_Guerrero:
         def __init__(self):
             pass
@@ -151,7 +150,6 @@ init python:
             else:
                 print("Guerrero ataca.")
                 return objeto.ataque_basico(enemigo)
-
     class IA_Arquero:
         def __init__(self):
             pass        
@@ -174,16 +172,16 @@ init python:
                 return objeto.tiro_doble(enemigo)
             elif dado == 5 and objeto.get_carcaj()>0 and objeto.get_flecha_trucada() >= 1:
                 print("Arquero usa flecha electrica")
-                return objeto.flecha_electrica
+                return objeto.flecha_electrica(enemigo)
             elif dado == 6 and objeto.get_carcaj()>0 and objeto.get_flecha_trucada() >= 1:
                 print("Arquero usa explosiva")
-                return objeto.flecha_explosiva
+                return objeto.flecha_explosiva(enemigo)
             elif dado == 7 and objeto.get_carcaj()>0 and objeto.get_flecha_trucada() >= 1:
                 print("Arquero usa flecha sombria")
-                return objeto.flecha_sombria
+                return objeto.flecha_sombria(enemigo)
             elif dado == 8 and objeto.get_carcaj()>0 and objeto.get_flecha_trucada() >= 1:
                 print("Arquero usa flecha especial")
-                return objeto.flechita_especial
+                return objeto.flechita_especial(enemigo)
             else:
                 print("Arquero dispara flecha normal.")
                 return objeto.disparar_flechas(enemigo)

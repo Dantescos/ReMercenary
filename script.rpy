@@ -54,7 +54,6 @@ init python:
 # ==========================================================
     def crear_heroes():
         return [ Kazuki(2, 3), Lyra(4, 3), Gromm(6, 3) ]
-
 # ==========================================================
 # CREAR ENEMIGOS (FIJOS PARA EL TABLERO)
 # ==========================================================
@@ -98,7 +97,6 @@ init python:
         x, y = posiciones.pop()
         enemigos.append(ArchiMago("Archimago2", 300, 35, 25, 3, 3, 50, x, y, 0, True, 1500, 100))
         return enemigos
-
 # ============================================================
 # FUNCIONES DE INTERACCION
 # ============================================================
@@ -189,11 +187,34 @@ init python:
 # LABEL DE COMBATE
 # ============================================================
 label combate(heroe, enemigo):
+    python:
+        # Variable para guardar la IA
+        ia = None
+        # Segun el nombre del enemigo, elegimos la IA correcta
+        if "ArchiMago" in enemigo.get_clase():
+            ia = IA_ArchiMago()
+        elif "Lich" in enemigo.get_clase():
+            ia = IA_Lich()
+        elif "Clerigo" in enemigo.get_clase():
+            ia = IA_Clerigo()
+        elif "Guerrero" in enemigo.get_clase():
+            ia = IA_Guerrero()
+        elif "Arquero" in enemigo.get_clase():
+            ia = IA_Arquero()
+        elif "Dragon" in enemigo.get_clase():
+            ia = IA_Dragon()
+        elif "Mago" in enemigo.get_clase():
+            ia = IA_Mago()
+        elif "General" in enemigo.get_clase():
+            ia = IA_General()
+        else:
+            # Si no tiene IA especifica, se queda en None
+            ia = None
     while heroe.esta_vivo() and enemigo.esta_vivo():
         # --- Turno del jugador ---
         if heroe.get_clase() == "Kazuki":
             $ heroe.potenciar_aliado(heroe)
-            "Kazuki se potencia! ATQ +20%."
+            "Kazuki se potencia! ATQ +20%%."
         elif heroe.get_clase() == "Lyra":
             $ danio = heroe.flecha_perforante(enemigo)  
             "Lyra usa sus flechas especiales!"
@@ -211,21 +232,31 @@ label combate(heroe, enemigo):
             "Huir":
                 "Escapaste!"
                 return
+
         if not enemigo.esta_vivo():
-            "¡[  enemigo.get_clase()] ha muerto!"
+            "¡[enemigo.get_clase()] ha muerto!"
             $ enemigo.set_visible(False)
-        #Impongo condicion de victoria o por lo menos que mueran todos los enemigos
-        if not quedan_enemigos_vivos():
-            "¡Todos los enemigos han sido eliminados!"
-            $ store.partida_terminada = True
+            $ registrar_muerte_enemigo()
             return
-        # --- Turno del enemigo (IA) ---
-        "El [enemigo.get_clase()] ataca!"
-        $ danio_enemigo = enemigo.get_ataque_basico()
-        $ heroe_defensa = heroe.defenderse_recibir_danio(danio_enemigo)
-        " Te hizo [danio_enemigo] de daño"
+
+        python:
+            # Si el enemigo tiene IA, la usamos de la siguiente forma
+            if ia is not None:
+                # La IA decide y ejecuta la accion
+                # IMPORTANTE: hay que pasarle los aliados si los necesita
+                if "Clerigo" in enemigo.get_clase():
+                    ia.evaluar(enemigo, heroe, store.enemigos)
+                else:
+                    ia.evaluar(enemigo, heroe)
+            else:
+                # Si no tiene IA, ataca basico simple
+                danio_enemigo = enemigo.get_ataque_basico()
+                heroe.defenderse_recibir_danio(danio_enemigo)
+                renpy.say("", "Te hizo " + str(danio_enemigo) + " de daño.")
+        
         # Mostrar estado
         "[heroe.get_clase()] HP: [heroe.get_vida()] | [enemigo.get_clase()] HP: [enemigo.get_vida()]"
+        
         if not heroe.esta_vivo():
             "¡[heroe.get_clase()] ha muerto!"
             $ heroe.set_visible(False)
@@ -251,69 +282,69 @@ label armar_ejercito:
         "Ya tenes [maxima_cantidad_unidades] unidades. No podes agregar mas!"
         jump comenzar_batalla
     #aca voy a tener que usar lo siguiente para que aparezca al azar poque no funciona si no
-python:
-    posiciones_ejercito = [(x, y) for x in range(8) for y in (3, 4)]
-    casillas_ocupadas = [(u.get_x(), u.get_y()) for u in ejercito]
-    casillas_disponibles = [v for v in posiciones_ejercito if v not in casillas_ocupadas]
-    if not casillas_disponibles:
-        print("No hay casillas libres para desplegar!")
-        #jump comenzar_batalla
-    px, py = random.choice(casillas_disponibles)
-menu:
-        "Elegi una unidad para tu ejercito:"
-        "Mago":
-            $ unidad = Mago("Mago", 200, 25, 15, 4, 3, 30, px, py, 0, True, 100, 10, 10, 10)
-            $ ejercito.append(unidad)
-            "Agregaste un Mago."
-            jump armar_ejercito
-        "General":
-            $ unidad = General("General", 250, 30, 20, 3, 2, 40, px, py, 0, True, 1000, 500)
-            $ ejercito.append(unidad)
-            "Agregaste un General."
-            jump armar_ejercito
-        "Archimago":
-            $ unidad = ArchiMago("Archimago", 300, 35, 25, 3, 3, 50, px, py, 0, True, 1500, 100)
-            $ ejercito.append(unidad)
-            "Agregaste un Archimago."
-            jump armar_ejercito
-        "Guerrero":
-            $ unidad = Guerrero("Guerrero", 150, 40, 20, 4, 1, 35, px, py, 0, True)
-            $ ejercito.append(unidad)
-            "Agregaste un Guerrero."
-            jump armar_ejercito
-        "Dragon":
-            $ unidad = Dragon("Dragon", 300, 60, 30, 2, 3, 70, px, py, 0, True, 500, 0, 0)
-            $ ejercito.append(unidad)
-            "Agregaste un Dragon."
-            jump armar_ejercito
-        "Arquero":
-            $ unidad = Arquero("Arquero", 120, 25, 12, 4, 4, 30, px, py, 0, True, 30, 10)
-            $ ejercito.append(unidad)
-            "Agregaste un Arquero."
-            jump armar_ejercito
-        "Clerigo":
-            $ unidad = Clerigo("Clerigo", 150, 15, 18, 3, 2, 20, px, py, 0, True, 100)
-            $ ejercito.append(unidad)
-            "Agregaste un Clerigo."
-            jump armar_ejercito
-        "Lich":
-            $ unidad = Lich("Lich", 180, 28, 20, 3, 2, 45, px, py, 0, True, 200)
-            $ ejercito.append(unidad)
-            "Agregaste un Lich."
-            jump armar_ejercito
-        "Terminar de armar ejercito":
-            if total == 0:
-                "No tenes unidades, selecciona al menos una!"
+    python:
+        posiciones_ejercito = [(x, y) for x in range(8) for y in (3, 4)]
+        casillas_ocupadas = [(u.get_x(), u.get_y()) for u in ejercito]
+        casillas_disponibles = [v for v in posiciones_ejercito if v not in casillas_ocupadas]
+        if not casillas_disponibles:
+            print("No hay casillas libres para desplegar!")
+            #jump comenzar_batalla
+        px, py = random.choice(casillas_disponibles)
+    menu:
+            "Elegi una unidad para tu ejercito:"
+            "Mago":
+                $ unidad = Mago("Mago", 200, 25, 15, 4, 3, 30, px, py, 0, True, 100, 10, 10, 10)
+                $ ejercito.append(unidad)
+                "Agregaste un Mago."
                 jump armar_ejercito
-            else:
-                menu:
-                    "Elegi un nivel:"
-                    "Nivel 1 - Goblins":
-                        jump nivel1
-                    "Nivel 2 - Fortaleza":
-                        jump nivel2
-                    "Nivel Aleatorio":
-                        jump nivel_aleatorio
+            "General":
+                $ unidad = General("General", 250, 30, 20, 3, 2, 40, px, py, 0, True, 1000, 500)
+                $ ejercito.append(unidad)
+                "Agregaste un General."
+                jump armar_ejercito
+            "Archimago":
+                $ unidad = ArchiMago("Archimago", 300, 35, 25, 3, 3, 50, px, py, 0, True, 1500, 100)
+                $ ejercito.append(unidad)
+                "Agregaste un Archimago."
+                jump armar_ejercito
+            "Guerrero":
+                $ unidad = Guerrero("Guerrero", 150, 40, 20, 4, 1, 35, px, py, 0, True)
+                $ ejercito.append(unidad)
+                "Agregaste un Guerrero."
+                jump armar_ejercito
+            "Dragon":
+                $ unidad = Dragon("Dragon", 300, 60, 30, 2, 3, 70, px, py, 0, True, 500, 0, 0)
+                $ ejercito.append(unidad)
+                "Agregaste un Dragon."
+                jump armar_ejercito
+            "Arquero":
+                $ unidad = Arquero("Arquero", 120, 25, 12, 4, 4, 30, px, py, 0, True, 30, 10)
+                $ ejercito.append(unidad)
+                "Agregaste un Arquero."
+                jump armar_ejercito
+            "Clerigo":
+                $ unidad = Clerigo("Clerigo", 150, 15, 18, 3, 2, 20, px, py, 0, True, 100)
+                $ ejercito.append(unidad)
+                "Agregaste un Clerigo."
+                jump armar_ejercito
+            "Lich":
+                $ unidad = Lich("Lich", 180, 28, 20, 3, 2, 45, px, py, 0, True, 200)
+                $ ejercito.append(unidad)
+                "Agregaste un Lich."
+                jump armar_ejercito
+            "Terminar de armar ejercito":
+                if total == 0:
+                    "No tenes unidades, selecciona al menos una!"
+                    jump armar_ejercito
+                else:
+                    menu:
+                        "Elegi un nivel:"
+                        "Nivel 1 - Goblins":
+                            jump nivel1
+                        "Nivel 2 - Fortaleza":
+                            jump nivel2
+                        "Nivel Aleatorio":
+                            jump nivel_aleatorio
 # ============================================================
 # LABEL: COMENZAR BATALLA
 # ============================================================
@@ -445,14 +476,6 @@ screen tablero():
                     xsize 56
                     ysize 56
                     add {"Dragon": "Dragon.png","Lich": "Lich.png","Archimago": "Archimago.png","Mago": "Mago.png","Clerigo": "Clerigo.png","Guerrero": "Guerrero.png","General": "General.png","Arquero": "Arquero.png"}.get(unidad_ejercito.get_clase(), "default.png")
-# ======================================================
-# CURSOR DEL JUGADOR
-# ======================================================
-        add Solid("#0000FF66"):
-            xpos OFFSET_X + jugador_x * CASILLA_W
-            ypos OFFSET_Y + jugador_y * CASILLA_H
-            xsize CASILLA_W
-            ysize CASILLA_H
 # ======================================================
 # TEXTO DEL TURNO
 # ======================================================

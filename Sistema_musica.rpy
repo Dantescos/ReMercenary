@@ -3,7 +3,6 @@
 # ============================================================
 
 init python:
-
     def reproducir_musica(nombre, fadein=1.0, loop=True):
         renpy.music.play("audio/" + nombre,    # Ruta completa
             fadein=fadein,        # Transicion de entrada
@@ -26,26 +25,7 @@ init python:
         renpy.music.set_volume(volumen, channel="music")
 
 # ==========================================
-# MUSICA PARA CONTEXTO
-screen menu_principal():
-    frame:
-        xfill True
-        yfill True
-        background "#0a0a1a"
-
-        vbox:
-            xalign 0.5
-            yalign 0.5
-            spacing 30
-
-            text "RE: MERCENARY" size 60 color "#ffcc00" bold True
-            textbutton "Comenzar":
-                action [Jump("level_one")]
-                text_size 30
-
-            textbutton "Salir":
-                action Quit()
-
+# MUSICA PARA CONTEXTO DE MISIONES
 label level_one:
     $ reproducir_musica("Lvl1.wav")  
     "Comienza el Nivel 1..." # Poner un texto/pausa para escuchar la musica
