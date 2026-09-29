@@ -17,6 +17,9 @@ default maxima_cantidad_unidades = 8  # Maximo 8 unidades
 default enemigos = []
 default enemigos_iniciales = []  # Guardamos los enemigos originales para resetear
 default partida_terminada = False
+# Definir las imagenes como "images"
+image pantalla_inicio = "pantalla_inicio.png"
+image portada = "portada.png"
 # ============================================================
 # INICIALIZACION Y CLASES
 # ============================================================
@@ -182,7 +185,6 @@ init python:
                 renpy.call_in_new_context("combate", heroe, enemigo)
                 break
         return movio
-
 # ============================================================
 # LABEL DE COMBATE
 # ============================================================
@@ -486,20 +488,6 @@ screen tablero():
             text texto_turno:
                 size 30
     key "K_ESCAPE" action Return()
-# ============================================================
-# SCREEN: MENU PRINCIPAL
-# ============================================================
-screen menu_principal():
-    frame:#agrego un frame para que el fondo se vea completo
-        xfill True
-        yfill True
-        background "#0a0a1a"
-        add "pantalla_inicio.png"
-    vbox:
-        xalign 0.5
-        yalign 0.8
-        textbutton "Comenzar" action Jump("inicio") xalign 0.5 text_size 30
-        textbutton "Salir" action Quit() xalign 0.5 text_size 30
 # ==============================================================
 # PANTALLA DE SELECCION DE HEROE (SIN IMAGENES)
 # ==============================================================
@@ -536,12 +524,27 @@ screen seleccion_heroes():
                 text_size 30
                 xalign 0.5
 # ============================================================
+# SPLASHSCREEN (lo primero que ve el jugador)
+# ============================================================
+label splashscreen:
+    scene black
+    
+    # Mostrar la imagen de inicio
+    show pantalla_inicio at truecenter
+    
+    with Pause(2.5)   # Mostrarla por 2.5 segundos
+    
+        
+    hide pantalla_inicio
+    with dissolve
+
+    return
+# ============================================================
 # LABEL START (PUNTO DE ENTRADA DEL JUEGO)
 # ============================================================
 label start:
     $ reproducir_musica("main.wav", fadein=1.0, loop=True)
-    call screen menu_principal #OJO si quieren ver lo del tablero y demas , TIENEN QUE BORRAR ESTO, LO HICE DE PRUEBA!
-
+    jump inicio
 label inicio:
     scene black
     # Crear heroes y enemigos
