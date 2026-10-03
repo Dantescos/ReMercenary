@@ -1,8 +1,6 @@
 ﻿# ============================================================
 # RE: MERCENARY - SCRIPT PRINCIPAL
 # ============================================================
-
-# VARIABLES GLOBALES
 default turno_jugador = True
 default jugador_x = 0
 default jugador_y = 0
@@ -20,23 +18,18 @@ default partida_terminada = False
 default resultado_batalla = ""
 default nivel_actual = 0
 default partida_guardada = False
-default seleccion_heroe=True
+default seleccion_heroe = True
 default slot_guardado = "partida"
 default boss_musica_activada = False
-
-# VARIABLES MODO VERSUS
+default boss_spawneado = False
 default modo_versus = False
 default ejercito_j1 = []
 default ejercito_j2 = []
 default turno_actual = 1
 
-# Imágenes
 image pantalla_inicio = "pantalla_inicio.png"
 image portada = "portada.png"
 
-# ============================================================
-# CONFIGURACIÓN DEL TABLERO
-# ============================================================
 init python:
     import random
     COLUMNAS = 8
@@ -46,23 +39,23 @@ init python:
     CASILLA_W = 195
     CASILLA_H = 170
 
-# ============================================================
-# FUNCIONES DE DAÑO Y STATS
-# ============================================================
 init python:
+    def registrar_habilidad_usada():
+        pass
+
     def get_stats_personaje(personaje):
-        clase = personaje.get_clase()
         hp = personaje.get_vida()
-        texto = "HP: " + str(hp)
+        hp_max = personaje.get_vida_max()
+        texto = "HP: " + str(hp) + "/" + str(hp_max)
         try:
-            if clase in ["Kazuki", "Mago", "Archimago", "Lich", "Clerigo", "Dragon", "Mago2", "Lich2", "Archimago2", "Clerigo2"]:
-                texto += " | MAGIA: " + str(personaje.get_magia())
-            elif clase in ["Lyra", "Arquero", "Arquero2"]:
+            if isinstance(personaje, (store.Mago, store.ArchiMago, store.Lich, store.Clerigo, store.Dragon)):
+                texto += " | MAGIA: " + str(personaje.get_magia()) + "/" + str(personaje.get_magia_max())
+            elif isinstance(personaje, store.Arquero):
                 texto += " | FLECHAS: " + str(personaje.get_carcaj()) + " | ESP: " + str(personaje.get_flecha_trucada())
-            elif clase in ["General", "General2"]:
+            elif isinstance(personaje, store.General):
                 texto += " | ENERGIA: " + str(personaje.get_energia())
-            elif clase in ["Guerrero", "Gromm", "Guerrero2"]:
-                texto += " | (Fisico)"
+            elif isinstance(personaje, store.Guerrero):
+                texto += " | ATQ: " + str(personaje.get_ataque_basico()) + " | DEF: " + str(personaje.get_defensa())
         except:
             pass
         return texto
@@ -84,76 +77,55 @@ init python:
         return danio
 
 # ============================================================
-# MOVIMIENTO DE ENEMIGOS
+# MOVIMIENTO DE ENEMIGOS - PARA QUE LA IA SE MUEVA
 # ============================================================
 init python:
     def mover_enemigos():
-        heroe = store.heroe_actual
-        if heroe is None or not heroe.esta_vivo():
-            return
         for enemigo in store.enemigos[:]:
             if not enemigo.get_visible() or not enemigo.esta_vivo():
                 continue
-            if enemigo.get_x() < heroe.get_x():
-                enemigo.set_x(enemigo.get_x() + 1)
-            elif enemigo.get_x() > heroe.get_x():
-                enemigo.set_x(enemigo.get_x() - 1)
-            elif enemigo.get_y() < heroe.get_y():
-                enemigo.set_y(enemigo.get_y() + 1)
-            elif enemigo.get_y() > heroe.get_y():
-                enemigo.set_y(enemigo.get_y() - 1)
-            if enemigo.get_x() == heroe.get_x() and enemigo.get_y() == heroe.get_y():
-                renpy.call_in_new_context("combate", heroe, enemigo)
-                return
 
-# ============================================================
-# CREAR HEROES Y ENEMIGOS
-# ============================================================
+            objetivo = None
+            menor_dist = 9999
+            for h in store.heroes + store.ejercito:
+                if h.get_visible() and h.esta_vivo():
+                    dist = abs(h.get_x() - enemigo.get_x()) + abs(h.get_y() - enemigo.get_y())
+                    if dist < menor_dist:
+                        menor_dist = dist
+                        objetivo = h
+
+            if objetivo is None:
+                continue
+
+            ex, ey = enemigo.get_x(), enemigo.get_y()
+            hx, hy = objetivo.get_x(), objetivo.get_y()
+
+            opciones = []
+            for dx, dy in [(1,0), (-1,0), (0,1), (0,-1)]:
+                nx, ny = ex + dx, ey + dy
+                if nx < 0 or nx >= COLUMNAS or ny < 0 or ny >= FILAS:
+                    continue
+                ocupada = False
+                for otra in store.enemigos + store.heroes + store.ejercito:
+                    if otra != enemigo and otra.get_visible() and otra.esta_vivo():
+                        if otra.get_x() == nx and otra.get_y() == ny:
+                            ocupada = True
+                            break
+                if not ocupada:
+                    nueva_dist = abs(nx - hx) + abs(ny - hy)
+                    opciones.append((nueva_dist, nx, ny))
+
+            if opciones:
+                opciones.sort()
+                _, nx, ny = opciones[0]
+                enemigo.set_x(nx)
+                enemigo.set_y(ny)
+                print("[MOV] " + enemigo.get_clase() + " -> (" + str(nx) + "," + str(ny) + ")")
+
 init python:
     def crear_heroes():
         return [Kazuki(2, 3), Lyra(4, 3), Gromm(6, 3)]
 
-    def crear_enemigos():
-        posiciones = [(x, y) for x in range(8) for y in [0, 1]]
-        random.shuffle(posiciones)
-        enemigos = []
-        x, y = posiciones.pop()
-        enemigos.append(Mago("Mago", 200, 25, 15, 4, 3, 30, x, y, 0, True, 100, 10, 10, 10))
-        x, y = posiciones.pop()
-        enemigos.append(General("General", 250, 30, 20, 3, 2, 40, x, y, 0, True, 1000, 500))
-        x, y = posiciones.pop()
-        enemigos.append(Arquero("Arquero", 120, 25, 12, 4, 4, 30, x, y, 0, True, 30, 10))
-        x, y = posiciones.pop()
-        enemigos.append(Clerigo("Clerigo", 150, 15, 18, 3, 2, 20, x, y, 0, True, 100))
-        x, y = posiciones.pop()
-        enemigos.append(Guerrero("Guerrero", 150, 40, 20, 4, 1, 35, x, y, 0, True))
-        x, y = posiciones.pop()
-        enemigos.append(Dragon("Dragon", 300, 60, 30, 2, 3, 70, x, y, 0, True, 500, 0, 0))
-        x, y = posiciones.pop()
-        enemigos.append(Lich("Lich", 180, 28, 20, 3, 2, 45, x, y, 0, True, 200))
-        x, y = posiciones.pop()
-        enemigos.append(ArchiMago("Archimago", 300, 35, 25, 3, 3, 50, x, y, 0, True, 1500, 100))
-        x, y = posiciones.pop()
-        enemigos.append(Mago("Mago2", 200, 25, 15, 4, 3, 30, x, y, 0, True, 100, 10, 10, 10))
-        x, y = posiciones.pop()
-        enemigos.append(General("General2", 250, 30, 20, 3, 2, 40, x, y, 0, True, 1000, 500))
-        x, y = posiciones.pop()
-        enemigos.append(Arquero("Arquero2", 120, 25, 12, 4, 4, 30, x, y, 0, True, 30, 10))
-        x, y = posiciones.pop()
-        enemigos.append(Clerigo("Clerigo2", 150, 15, 18, 3, 2, 20, x, y, 0, True, 100))
-        x, y = posiciones.pop()
-        enemigos.append(Guerrero("Guerrero2", 150, 40, 20, 4, 1, 35, x, y, 0, True))
-        x, y = posiciones.pop()
-        enemigos.append(Dragon("Dragon2", 300, 60, 30, 2, 3, 70, x, y, 0, True, 500, 0, 0))
-        x, y = posiciones.pop()
-        enemigos.append(Lich("Lich2", 180, 28, 20, 3, 2, 45, x, y, 0, True, 200))
-        x, y = posiciones.pop()
-        enemigos.append(ArchiMago("Archimago2", 300, 35, 25, 3, 3, 50, x, y, 0, True, 1500, 100))
-        return enemigos
-
-# ============================================================
-# FUNCIONES AUXILIARES
-# ============================================================
 init python:
     def quedan_enemigos_vivos():
         for enemigo in store.enemigos:
@@ -163,7 +135,7 @@ init python:
 
     def quedan_heroes_vivos():
         for heroe in store.heroes:
-            if heroe.get_visible() and heroe.esta_vivo():
+            if heroe.esta_vivo():
                 return True
         return False
 
@@ -172,6 +144,20 @@ init python:
             if unidad.get_visible() and unidad.esta_vivo():
                 return True
         return False
+
+    def contar_esbirros_vivos():
+        contador = 0
+        for enemigo in store.enemigos:
+            if enemigo.get_visible() and enemigo.esta_vivo() and not es_boss(enemigo.get_clase()):
+                contador += 1
+        return contador
+
+    def contar_bosses_vivos():
+        contador = 0
+        for enemigo in store.enemigos:
+            if enemigo.get_visible() and enemigo.esta_vivo() and es_boss(enemigo.get_clase()):
+                contador += 1
+        return contador
 
     def cambiar_turno():
         if store.turno_actual == 1:
@@ -188,13 +174,38 @@ init python:
         store.slot_guardado = slot
         renpy.notify("Partida guardada.")
 
+    def verificar_combate_cercano():
+        heroe = store.heroe_actual
+        if heroe is None or not heroe.esta_vivo():
+            return None
+        for enemigo in store.enemigos:
+            if enemigo.get_visible() and enemigo.esta_vivo() and enemigo.get_x() == heroe.get_x() and enemigo.get_y() == heroe.get_y():
+                return enemigo
+        return None
+
+    def verificar_combate_adyacente(heroe):
+        if heroe is None or not heroe.esta_vivo():
+            return None
+        for enemigo in store.enemigos:
+            if enemigo.get_visible() and enemigo.esta_vivo():
+                dist = abs(enemigo.get_x() - heroe.get_x()) + abs(enemigo.get_y() - heroe.get_y())
+                if dist <= 1:
+                    return enemigo
+        return None
+
 # ============================================================
-# CLICK EN CASILLA (MODO NORMAL)
+# CLICK EN CASILLA
 # ============================================================
 init python:
     def click_casilla(x, y):
         if not store.turno_jugador:
             renpy.notify("Turno enemigo")
+            return
+
+        enemigo_encima = verificar_combate_cercano()
+        if enemigo_encima is not None:
+            renpy.call_in_new_context("combate", store.heroe_actual, enemigo_encima)
+            store.unidad_seleccionada = None
             return
 
         for heroe in store.heroes:
@@ -232,22 +243,48 @@ init python:
         store.jugador_x = x
         store.jugador_y = y
 
+        enemigo_encima = verificar_combate_cercano()
+        if enemigo_encima is not None:
+            renpy.call_in_new_context("combate", store.heroe_actual, enemigo_encima)
+            store.unidad_seleccionada = None
+            return
+
         renpy.notify("Turno enemigo")
         store.turno_jugador = False
         store.texto_turno = "Turno enemigo"
+
         mover_enemigos()
 
-        enemigos_vivos = [e for e in store.enemigos if e.get_visible() and e.esta_vivo()]
-        if len(enemigos_vivos) == 1 and not store.boss_musica_activada:
-            if store.nivel_actual >= 1 and store.nivel_actual <= 7:
-                store.boss_musica_activada = True
-                try:
-                    reproducir_musica("Boss" + str(store.nivel_actual) + ".wav", fadein=0.5, loop=True)
-                    renpy.notify("¡BOSS! ¡Queda 1 enemigo!")
-                except:
-                    pass
+        parejas = []
+        for heroe in store.heroes:
+            if heroe.get_visible() and heroe.esta_vivo():
+                enemigo = verificar_combate_adyacente(heroe)
+                if enemigo is not None:
+                    parejas.append((heroe, enemigo))
 
-        if not quedan_enemigos_vivos():
+        for heroe, enemigo in parejas:
+            if heroe.esta_vivo() and enemigo.esta_vivo():
+                store.heroe_actual = heroe
+                renpy.call_in_new_context("combate", heroe, enemigo)
+                if not quedan_heroes_vivos():
+                    store.resultado_batalla = "derrota"
+                    store.partida_terminada = True
+                    return
+
+        if not quedan_enemigos_vivos() and not store.boss_spawneado:
+            if store.nivel_actual >= 1 and store.nivel_actual <= 7:
+                bx, by = 4, 0
+                nuevo_boss = crear_boss_por_nivel(store.nivel_actual, bx, by)
+                if nuevo_boss is not None:
+                    store.enemigos.append(nuevo_boss)
+                    store.boss_spawneado = True
+                    try:
+                        reproducir_musica("Boss" + str(store.nivel_actual) + ".wav", fadein=0.5, loop=True)
+                    except:
+                        pass
+                    renpy.notify("EL BOSS HA APARECIDO!")
+
+        if store.boss_spawneado and not quedan_enemigos_vivos():
             store.resultado_batalla = "victoria"
             store.partida_terminada = True
             return
@@ -262,9 +299,6 @@ init python:
         store.unidad_seleccionada = None
         renpy.notify("Tu turno")
 
-# ============================================================
-# CLICK EN CASILLA (MODO VERSUS)
-# ============================================================
 init python:
     def click_casilla_versus(x, y):
         if store.turno_actual == 1:
@@ -329,478 +363,612 @@ init python:
             return
 
 # ============================================================
-# COMBATE (MODO NORMAL) - MENÚS COMPLETOS
+# COMBATE
 # ============================================================
 label combate(heroe, enemigo):
     python:
         ia = None
         clase_enemigo = enemigo.get_clase()
-        if "Archimago" in clase_enemigo:
-            ia = IA_ArchiMago()
-        elif "Lich" in clase_enemigo:
-            ia = IA_Lich()
-        elif "Clerigo" in clase_enemigo:
-            ia = IA_Clerigo()
-        elif "Guerrero" in clase_enemigo:
-            ia = IA_Guerrero()
-        elif "Arquero" in clase_enemigo:
-            ia = IA_Arquero()
-        elif "Dragon" in clase_enemigo:
-            ia = IA_Dragon()
-        elif "Mago" in clase_enemigo:
-            ia = IA_Mago()
-        elif "General" in clase_enemigo:
-            ia = IA_General()
-        else:
-            ia = None
+        if "Archimago" in clase_enemigo: ia = IA_ArchiMago()
+        elif "Lich" in clase_enemigo: ia = IA_Lich()
+        elif "Clerigo" in clase_enemigo: ia = IA_Clerigo()
+        elif "Guerrero" in clase_enemigo: ia = IA_Guerrero()
+        elif "Arquero" in clase_enemigo: ia = IA_Arquero()
+        elif "Dragon" in clase_enemigo: ia = IA_Dragon()
+        elif "Mago" in clase_enemigo: ia = IA_Mago()
+        elif "General" in clase_enemigo: ia = IA_General()
+        else: ia = None
 
     while heroe.esta_vivo() and enemigo.esta_vivo():
-        $ stats_heroe = get_stats_personaje(heroe)
-        $ hp_enemigo = enemigo.get_vida()
         $ nombre_enemigo = enemigo.get_clase()
-        $ def_enemiga = enemigo.get_defensa()
-        "[stats_heroe]  ||  [nombre_enemigo] HP: [hp_enemigo] (DEF [def_enemiga])"
+        $ nombre_heroe = heroe.get_clase()
+        $ stats_heroe = get_stats_personaje(heroe)
+        $ stats_enemigo = get_stats_personaje(enemigo)
+        "[nombre_heroe]: [stats_heroe]"
+        "[nombre_enemigo]: [stats_enemigo]"
 
         $ clase = heroe.get_clase()
+        $ accion_realizada = False
 
         # ============================================
-        # KAZUKI (Mago + potenciar) - 10 opciones
+        # KAZUKI
         # ============================================
         if clase == "Kazuki":
+            $ info_k = "Kazuki - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
             menu:
-                "Kazuki - ¿Que haras?"
-                "Atacar (Bola de Fuego)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.5)
-                    $ registrar_habilidad_usada()
-                    "¡BOLA DE FUEGO! [danio] de danio."
-                "Potenciar aliado (+20%% ATQ)":
+                "[info_k]"
+                "Atacar (Bola de Fuego) - 100 magia":
+                    $ danio = heroe.ataque_basico(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia! Recuperas 50."
+                    else:
+                        $ accion_realizada = True
+                        "BOLA DE FUEGO! [danio] de danio."
+                "Bola de Fuego Mejorada - 200 magia":
+                    $ danio = heroe.bola_fuego_mejorada(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia o usos!"
+                    else:
+                        $ accion_realizada = True
+                        "Bola Mejorada! [danio] de danio."
+                "Ataque Hielo Infernal - 100 magia":
+                    $ danio = heroe.ataque_hielo_infernal(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia o usos!"
+                    else:
+                        $ accion_realizada = True
+                        "Hielo Infernal! [danio] de danio."
+                "Castigo Divino - 300 magia":
+                    $ danio = heroe.ataque_castigo_divino(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia o usos!"
+                    else:
+                        $ accion_realizada = True
+                        "Castigo Divino! [danio] de danio."
+                "Vientos Infernales - 500 magia":
+                    $ danio = heroe.vientos_infernales_prohibidos(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Vientos Infernales! [danio] de danio."
+                "Waldgose - 1000 magia":
+                    $ danio = heroe.ataque_magico_prohibido(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "WALDGOSE! [danio] de danio."
+                "Potenciar aliado (+20% ATQ)":
                     $ heroe.potenciar_aliado(heroe)
-                    $ registrar_habilidad_usada()
-                    "¡Kazuki se potencia! ATQ: [heroe.get_ataque_basico()]"
-                "Bola de Fuego Mejorada":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.8)
-                    $ registrar_habilidad_usada()
-                    "¡Bola Mejorada! [danio] de danio."
-                "Ataque Hielo Infernal":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.6)
-                    $ registrar_habilidad_usada()
-                    "¡Hielo Infernal! [danio] de danio."
-                "Castigo Divino":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.0)
-                    $ registrar_habilidad_usada()
-                    "¡Castigo Divino! [danio] de danio."
-                "Vientos Infernales Prohibidos":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.5)
-                    $ registrar_habilidad_usada()
-                    "¡Vientos Infernales! [danio] de danio."
-                "Ataque Magico Prohibido (Waldgose)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 3.5)
-                    $ registrar_habilidad_usada()
-                    "¡WALDGOSE! [danio] de danio."
-                "Proteccion Magica (+DEF x2)":
-                    $ heroe.set_defensa(heroe.get_defensa() * 2)
-                    $ registrar_habilidad_usada()
-                    "DEF: [heroe.get_defensa()]"
-                "Curacion Magica":
-                    $ heroe.set_vida(min(heroe.get_vida() + 50, 180))
-                    $ registrar_habilidad_usada()
-                    "HP: [heroe.get_vida()]"
-                "Recuperar Magia":
-                    $ heroe.set_magia(min(heroe.get_magia() + 100, 250))
+                    $ accion_realizada = True
+                    "Kazuki se potencia! ATQ: [heroe.get_ataque_basico()]"
+                "Curacion Magica - 290 magia":
+                    $ curado = heroe.curacion_magica()
+                    if curado == 0:
+                        "No tienes suficiente magia o vida llena!"
+                    else:
+                        $ accion_realizada = True
+                        "HP recuperado: [curado]"
+                "Recuperar Magia +100":
+                    $ heroe.recuperar_magia(100)
+                    $ accion_realizada = True
                     "MAGIA: [heroe.get_magia()]"
-                "Magia de Vuelo (5 casillas)":
-                    $ heroe.set_magia(max(0, heroe.get_magia() - 30))
-                    $ registrar_habilidad_usada()
-                    "¡Teletransporte! MAGIA: [heroe.get_magia()]"
                 "Huir":
                     "Escapaste!"
                     return
 
         # ============================================
-        # LYRA (Arquero + flecha_perforante) - 9 opciones
+        # LYRA
         # ============================================
         elif clase == "Lyra":
+            $ info_l = "Lyra - FLECHAS: " + str(heroe.get_carcaj()) + " | ESP: " + str(heroe.get_flecha_trucada())
             menu:
-                "Lyra - ¿Que haras?"
-                "Disparar Flecha":
-                    $ danio = aplicar_danio_basico(heroe, enemigo)
-                    $ heroe.set_carcaj(max(0, heroe.get_carcaj() - 1))
-                    "Disparas. [danio] de danio. Flechas: [heroe.get_carcaj()]"
-                "Flecha Perforante":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.8)
-                    $ heroe.set_carcaj(max(0, heroe.get_carcaj() - 1))
-                    $ heroe.set_flecha_trucada(max(0, heroe.get_flecha_trucada() - 1))
-                    $ registrar_habilidad_usada()
-                    "¡PERFORANTE! [danio] de danio."
-                "Flecha de Hielo":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.0)
-                    $ heroe.set_carcaj(max(0, heroe.get_carcaj() - 1))
-                    $ heroe.set_flecha_trucada(max(0, heroe.get_flecha_trucada() - 1))
-                    $ registrar_habilidad_usada()
-                    "¡Flecha de Hielo! [danio] de danio."
-                "Flecha Venenosa":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.5)
-                    $ heroe.set_carcaj(max(0, heroe.get_carcaj() - 1))
-                    $ heroe.set_flecha_trucada(max(0, heroe.get_flecha_trucada() - 1))
-                    $ registrar_habilidad_usada()
-                    "¡Venenosa! [danio] de danio."
-                "Flecha Explosiva":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 3.0)
-                    $ heroe.set_carcaj(max(0, heroe.get_carcaj() - 1))
-                    $ heroe.set_flecha_trucada(max(0, heroe.get_flecha_trucada() - 1))
-                    $ registrar_habilidad_usada()
-                    "¡EXPLOSIVA! [danio] de danio."
-                "Flecha Electrica":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 3.5)
-                    $ heroe.set_carcaj(max(0, heroe.get_carcaj() - 1))
-                    $ heroe.set_flecha_trucada(max(0, heroe.get_flecha_trucada() - 1))
-                    $ registrar_habilidad_usada()
-                    "¡Electrica! [danio] de danio."
-                "Tiro Doble":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.2)
-                    $ heroe.set_carcaj(max(0, heroe.get_carcaj() - 2))
-                    $ heroe.set_flecha_trucada(max(0, heroe.get_flecha_trucada() - 2))
-                    $ registrar_habilidad_usada()
-                    "¡Tiro Doble! [danio] de danio."
+                "[info_l]"
+                "Disparar Flecha (1 flecha)":
+                    $ danio = heroe.disparar_flechas(enemigo)
+                    if danio == 0:
+                        "No tienes flechas!"
+                    else:
+                        $ accion_realizada = True
+                        "Disparo! [danio] de danio. Flechas: [heroe.get_carcaj()]"
+                "Flecha Perforante (1 esp)":
+                    $ danio = heroe.flecha_perforante(enemigo)
+                    if danio == 0:
+                        "No tienes flechas!"
+                    else:
+                        $ accion_realizada = True
+                        "PERFORANTE! [danio] de danio."
+                "Flecha de Hielo (1 esp)":
+                    $ danio = heroe.flecha_de_hielo(enemigo)
+                    if danio == 0:
+                        "No tienes flechas o esp!"
+                    else:
+                        $ accion_realizada = True
+                        "Hielo! [danio] de danio."
+                "Flecha Venenosa (1 esp)":
+                    $ danio = heroe.flecha_venenosa(enemigo)
+                    if danio == 0:
+                        "No tienes flechas o esp!"
+                    else:
+                        $ accion_realizada = True
+                        "Venenosa! [danio] de danio."
+                "Flecha Explosiva (1 esp)":
+                    $ danio = heroe.flecha_explosiva(enemigo)
+                    if danio == 0:
+                        "No tienes flechas o esp!"
+                    else:
+                        $ accion_realizada = True
+                        "EXPLOSIVA! [danio] de danio."
+                "Flecha Electrica (1 esp)":
+                    $ danio = heroe.flecha_electrica(enemigo)
+                    if danio == 0:
+                        "No tienes flechas o esp!"
+                    else:
+                        $ accion_realizada = True
+                        "Electrica! [danio] de danio."
+                "Tiro Doble (2 flechas + 2 esp)":
+                    $ danio = heroe.tiro_doble(enemigo)
+                    if danio == 0:
+                        "No tienes suficientes flechas o esp!"
+                    else:
+                        $ accion_realizada = True
+                        "Tiro Doble! [danio] de danio."
                 "Recargar Carcaj":
-                    $ heroe.set_carcaj(30)
-                    $ heroe.set_flecha_trucada(10)
+                    $ heroe.recarga_rapida()
+                    $ accion_realizada = True
                     "Recargas. Flechas: [heroe.get_carcaj()] Esp: [heroe.get_flecha_trucada()]"
                 "Huir":
                     "Escapaste!"
                     return
 
         # ============================================
-        # GROMM (Guerrero + escudo) - 4 opciones
+        # GROMM
         # ============================================
         elif clase == "Gromm":
+            $ info_g = "Gromm - ATQ: " + str(heroe.get_ataque_basico()) + " | DEF: " + str(heroe.get_defensa())
             menu:
-                "Gromm - ¿Que haras?"
+                "[info_g]"
                 "Atacar":
-                    $ danio = aplicar_danio_basico(heroe, enemigo)
-                    "¡Golpe! [danio] de danio."
+                    $ danio = heroe.ataque_basico(enemigo)
+                    $ accion_realizada = True
+                    "Golpe! [danio] de danio."
                 "Testudo (+DEF x2)":
                     $ heroe.testudo()
-                    $ registrar_habilidad_usada()
+                    $ accion_realizada = True
                     "DEF: [heroe.get_defensa()]"
                 "Arremeter (+20 ATQ)":
                     $ heroe.arremeter()
-                    $ registrar_habilidad_usada()
+                    $ accion_realizada = True
                     "ATQ: [heroe.get_ataque_basico()]"
-                "Escudo Levantado (+DEF x2)":
-                    $ heroe.escudo_levantado()
-                    $ registrar_habilidad_usada()
-                    "DEF: [heroe.get_defensa()]"
                 "Huir":
                     "Escapaste!"
                     return
 
         # ============================================
-        # MAGO generico - 10 opciones
+        # MAGO
         # ============================================
-        elif clase == "Mago" or clase == "Mago2":
+        elif clase in ["Mago", "Mago2"]:
+            $ info_m = "Mago - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
             menu:
-                "Mago - ¿Que haras?"
-                "Atacar (Ragnarok)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.5)
-                    $ registrar_habilidad_usada()
-                    "¡Ragnarok! [danio] de danio."
-                "Bola de Fuego Mejorada":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.8)
-                    $ registrar_habilidad_usada()
-                    "¡Bola! [danio] de danio."
-                "Ataque Hielo Infernal":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.6)
-                    $ registrar_habilidad_usada()
-                    "¡Hielo! [danio] de danio."
-                "Castigo Divino":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.0)
-                    $ registrar_habilidad_usada()
-                    "¡Castigo! [danio] de danio."
-                "Vientos Infernales":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.5)
-                    $ registrar_habilidad_usada()
-                    "¡Vientos! [danio] de danio."
-                "Ataque Prohibido (Waldgose)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 3.5)
-                    $ registrar_habilidad_usada()
-                    "¡WALDGOSE! [danio] de danio."
-                "Proteccion Magica":
-                    $ heroe.set_defensa(heroe.get_defensa() * 2)
-                    "DEF: [heroe.get_defensa()]"
-                "Curacion Magica":
-                    $ heroe.set_vida(min(heroe.get_vida() + 50, 200))
-                    "HP: [heroe.get_vida()]"
-                "Recuperar Magia":
-                    $ heroe.set_magia(min(heroe.get_magia() + 100, 1000))
+                "[info_m]"
+                "Ataque basico - 100 magia":
+                    $ danio = heroe.ataque_basico(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia! Recuperas 50."
+                    else:
+                        $ accion_realizada = True
+                        "Ataque! [danio] de danio."
+                "Bola de Fuego Mejorada - 200 magia":
+                    $ danio = heroe.bola_fuego_mejorada(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia o usos!"
+                    else:
+                        $ accion_realizada = True
+                        "Bola! [danio] de danio."
+                "Hielo Infernal - 100 magia":
+                    $ danio = heroe.ataque_hielo_infernal(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia o usos!"
+                    else:
+                        $ accion_realizada = True
+                        "Hielo! [danio] de danio."
+                "Castigo Divino - 300 magia":
+                    $ danio = heroe.ataque_castigo_divino(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia o usos!"
+                    else:
+                        $ accion_realizada = True
+                        "Castigo! [danio] de danio."
+                "Vientos Infernales - 500 magia":
+                    $ danio = heroe.vientos_infernales_prohibidos(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Vientos! [danio] de danio."
+                "Waldgose - 1000 magia":
+                    $ danio = heroe.ataque_magico_prohibido(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "WALDGOSE! [danio] de danio."
+                "Curacion Magica - 290 magia":
+                    $ curado = heroe.curacion_magica()
+                    if curado == 0:
+                        "No tienes suficiente magia o vida llena!"
+                    else:
+                        $ accion_realizada = True
+                        "HP recuperado: [curado]"
+                "Recuperar Magia +100":
+                    $ heroe.recuperar_magia(100)
+                    $ accion_realizada = True
                     "MAGIA: [heroe.get_magia()]"
                 "Huir":
                     "Escapaste!"
                     return
 
         # ============================================
-        # ARCHIMAGO - 13 opciones
+        # ARCHIMAGO
         # ============================================
-        elif clase == "Archimago" or clase == "Archimago2":
+        elif clase in ["Archimago", "Archimago2"]:
+            $ info_a = "Archimago - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
             menu:
-                "Archimago - ¿Que haras?"
-                "Atacar (Vollzanbel)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.5)
-                    "¡Vollzanbel! [danio] de danio."
-                "Doom":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.0)
-                    $ registrar_habilidad_usada()
-                    "¡DOOM! [danio] de danio."
-                "Ataque Gelido (Todlicher Winter)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.8)
-                    $ registrar_habilidad_usada()
-                    "¡Todlicher Winter! [danio] de danio."
-                "Ataque Oscuro (Ewige Finsternis)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.2)
-                    $ registrar_habilidad_usada()
-                    "¡Ewige Finsternis! [danio] de danio."
-                "Espadas de Luz (Catastravia)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.5)
-                    $ registrar_habilidad_usada()
-                    "¡Catastravia! [danio] de danio."
-                "Relampago (Judradjim)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.8)
-                    $ registrar_habilidad_usada()
-                    "¡Judradjim! [danio] de danio."
-                "Ataque Final (Zooltraak 10x)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 10.0)
-                    $ registrar_habilidad_usada()
-                    "¡ZOOLTRAAK! [danio] de danio."
-                "Sabiduria Ancestral (+300 Magia)":
-                    $ heroe.set_magia(min(heroe.get_magia() + 300, 1500))
-                    "MAGIA: [heroe.get_magia()]"
-                "Detener el Tiempo":
-                    $ heroe.set_magia(max(0, heroe.get_magia() - 200))
-                    $ registrar_habilidad_usada()
-                    "¡TIEMPO DETENIDO! MAGIA: [heroe.get_magia()]"
-                "Ilusion de Archimago":
-                    $ heroe.set_magia(max(0, heroe.get_magia() - 100))
-                    "Ilusion activada."
-                "Curacion Magica":
-                    $ heroe.set_vida(min(heroe.get_vida() + 50, 300))
-                    "HP: [heroe.get_vida()]"
-                "Recuperar Magia":
-                    $ heroe.set_magia(min(heroe.get_magia() + 200, 1500))
+                "[info_a]"
+                "Ataque basico - 100 magia":
+                    $ danio = heroe.ataque_basico(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia! Recuperas 50."
+                    else:
+                        $ accion_realizada = True
+                        "Ataque! [danio] de danio."
+                "Ataque Especial - 300 magia":
+                    $ danio = heroe.ataque_especial(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Especial! [danio] de danio."
+                "Ataque Gelido - 259 magia":
+                    $ danio = heroe.ataque_gelido(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Gelido! [danio] de danio."
+                "Ataque Oscuro - 360 magia":
+                    $ danio = heroe.ataque_oscuro(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Oscuro! [danio] de danio."
+                "Espadas de Luz - 500 magia":
+                    $ danio = heroe.ataque_espadas_magicas_de_luz(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Espadas! [danio] de danio."
+                "Relampago - 365 magia":
+                    $ danio = heroe.ataque_magico_relampago(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Relampago! [danio] de danio."
+                "Ataque Final - 1000 magia":
+                    $ danio = heroe.ataque_final(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "FINAL! [danio] de danio."
+                "Curacion Magica - 290 magia":
+                    $ curado = heroe.curacion_magica()
+                    if curado == 0:
+                        "No tienes suficiente magia o vida llena!"
+                    else:
+                        $ accion_realizada = True
+                        "HP recuperado: [curado]"
+                "Recuperar Magia +200":
+                    $ heroe.recuperar_magia(200)
+                    $ accion_realizada = True
                     "MAGIA: [heroe.get_magia()]"
                 "Huir":
                     "Escapaste!"
                     return
 
         # ============================================
-        # GUERRERO generico - 3 opciones
+        # GUERRERO
         # ============================================
-        elif clase == "Guerrero" or clase == "Guerrero2":
+        elif clase in ["Guerrero", "Guerrero2"]:
+            $ info_gu = "Guerrero - ATQ: " + str(heroe.get_ataque_basico()) + " | DEF: " + str(heroe.get_defensa())
             menu:
-                "Guerrero - ¿Que haras?"
+                "[info_gu]"
                 "Atacar":
-                    $ danio = aplicar_danio_basico(heroe, enemigo)
+                    $ danio = heroe.ataque_basico(enemigo)
+                    $ accion_realizada = True
                     "Atacas. [danio] de danio."
                 "Testudo (+DEF x2)":
                     $ heroe.testudo()
+                    $ accion_realizada = True
                     "DEF: [heroe.get_defensa()]"
                 "Arremeter (+20 ATQ)":
                     $ heroe.arremeter()
+                    $ accion_realizada = True
                     "ATQ: [heroe.get_ataque_basico()]"
                 "Huir":
                     "Escapaste!"
                     return
 
         # ============================================
-        # ARQUERO generico - 8 opciones
+        # ARQUERO
         # ============================================
-        elif clase == "Arquero" or clase == "Arquero2":
+        elif clase in ["Arquero", "Arquero2"]:
+            $ info_ar = "Arquero - FLECHAS: " + str(heroe.get_carcaj()) + " | ESP: " + str(heroe.get_flecha_trucada())
             menu:
-                "Arquero - ¿Que haras?"
+                "[info_ar]"
                 "Disparar Flecha":
-                    $ danio = aplicar_danio_basico(heroe, enemigo)
-                    $ heroe.set_carcaj(max(0, heroe.get_carcaj() - 1))
-                    "Disparas. [danio] de danio. Flechas: [heroe.get_carcaj()]"
+                    $ danio = heroe.disparar_flechas(enemigo)
+                    if danio == 0:
+                        "No tienes flechas!"
+                    else:
+                        $ accion_realizada = True
+                        "Disparas. [danio] de danio. Flechas: [heroe.get_carcaj()]"
                 "Flecha Especial":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.8)
-                    $ heroe.set_carcaj(max(0, heroe.get_carcaj() - 1))
-                    $ heroe.set_flecha_trucada(max(0, heroe.get_flecha_trucada() - 1))
-                    "¡Especial! [danio] de danio."
+                    $ danio = heroe.flechita_especial(enemigo)
+                    if danio == 0:
+                        "No tienes flechas o esp!"
+                    else:
+                        $ accion_realizada = True
+                        "Especial! [danio] de danio."
                 "Flecha de Hielo":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.0)
-                    $ heroe.set_flecha_trucada(max(0, heroe.get_flecha_trucada() - 1))
-                    "¡Hielo! [danio] de danio."
+                    $ danio = heroe.flecha_de_hielo(enemigo)
+                    if danio == 0:
+                        "No tienes flechas o esp!"
+                    else:
+                        $ accion_realizada = True
+                        "Hielo! [danio] de danio."
                 "Flecha Venenosa":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.5)
-                    $ heroe.set_flecha_trucada(max(0, heroe.get_flecha_trucada() - 1))
-                    "¡Venenosa! [danio] de danio."
-                "Flecha Explosiva":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 3.0)
-                    $ heroe.set_flecha_trucada(max(0, heroe.get_flecha_trucada() - 1))
-                    "¡Explosiva! [danio] de danio."
+                    $ danio = heroe.flecha_venenosa(enemigo)
+                    if danio == 0:
+                        "No tienes flechas o esp!"
+                    else:
+                        $ accion_realizada = True
+                        "Venenosa! [danio] de danio."
                 "Tiro Doble":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.2)
-                    $ heroe.set_carcaj(max(0, heroe.get_carcaj() - 2))
-                    "¡Tiro Doble! [danio] de danio."
+                    $ danio = heroe.tiro_doble(enemigo)
+                    if danio == 0:
+                        "No tienes flechas o esp!"
+                    else:
+                        $ accion_realizada = True
+                        "Tiro Doble! [danio] de danio."
                 "Recargar":
-                    $ heroe.set_carcaj(30)
-                    $ heroe.set_flecha_trucada(10)
+                    $ heroe.recarga_rapida()
+                    $ accion_realizada = True
                     "Recargas. Flechas: [heroe.get_carcaj()]"
                 "Huir":
                     "Escapaste!"
                     return
 
         # ============================================
-        # LICH - 6 opciones
+        # LICH
         # ============================================
-        elif clase == "Lich" or clase == "Lich2":
+        elif clase in ["Lich", "Lich2"]:
+            $ info_li = "Lich - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
             menu:
-                "Lich - ¿Que haras?"
-                "Orbe de Sombras":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.5)
-                    "¡Orbe! [danio] de danio."
-                "Ataque Espectral":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.8)
-                    $ registrar_habilidad_usada()
-                    "¡Espectral! [danio] de danio."
-                "Drenar Vida":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.0)
-                    $ heroe.set_vida(min(heroe.get_vida() + danio // 2, 180))
-                    $ registrar_habilidad_usada()
-                    "¡Drenar! [danio] de danio. HP: [heroe.get_vida()]"
-                "Ataque Masivo":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 3.0)
-                    $ registrar_habilidad_usada()
-                    "¡Masivo! [danio] de danio."
-                "Curar":
-                    $ heroe.set_vida(min(heroe.get_vida() + 50, 180))
-                    "HP: [heroe.get_vida()]"
+                "[info_li]"
+                "Ataque basico - 100 magia":
+                    $ danio = heroe.ataque_basico(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia! Recuperas 50."
+                    else:
+                        $ accion_realizada = True
+                        "Ataque! [danio] de danio."
+                "Ataque Espectral - 50 magia":
+                    $ danio = heroe.ataque_espectral(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Espectral! [danio] de danio."
+                "Drenar Vida - 30 magia":
+                    $ danio = heroe.drenar_vida(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Drenar! [danio] de danio. HP: [heroe.get_vida()]"
+                "Ataque Masivo - 100 magia":
+                    $ danio = heroe.ataque_masivo(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Masivo! [danio] de danio."
+                "Curar - 40 magia":
+                    $ curado = heroe.curar()
+                    if curado == 0:
+                        "No tienes suficiente magia o vida llena!"
+                    else:
+                        $ accion_realizada = True
+                        "HP recuperado: [curado]"
                 "Regenerar Magia":
-                    $ heroe.set_magia(min(heroe.get_magia() + 50, 200))
+                    $ restaurado = heroe.regenerar_magia()
+                    $ accion_realizada = True
+                    "MAGIA restaurada: [restaurado]"
+                "Huir":
+                    "Escapaste!"
+                    return
+
+        # ============================================
+        # CLERIGO
+        # ============================================
+        elif clase in ["Clerigo", "Clerigo2"]:
+            $ info_cl = "Clerigo - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
+            menu:
+                "[info_cl]"
+                "Ataque basico - 100 magia":
+                    $ danio = heroe.ataque_basico(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia! Recuperas 50."
+                    else:
+                        $ accion_realizada = True
+                        "Ataque! [danio] de danio."
+                "Palabras de Fe - 100 magia":
+                    $ resultado = heroe.palabras_de_fe(enemigo)
+                    if resultado == False:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "ATQ enemigo reducido a [enemigo.get_ataque_basico()]"
+                "Luz Cegadora - 300 magia":
+                    $ danio = heroe.luz_cegadora_dia(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Luz! [danio] de danio."
+                "Exorcismo - 400 magia":
+                    $ danio = heroe.exorcismo(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "EXORCISMO! [danio] de danio."
+                "Escudo de Fe - 200 magia":
+                    $ resultado = heroe.escudo_de_fe_magico()
+                    if resultado == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "DEF: [heroe.get_defensa()]"
+                "Recuperar Magia +200":
+                    $ heroe.recuperacion_sagrada(200)
+                    $ accion_realizada = True
                     "MAGIA: [heroe.get_magia()]"
                 "Huir":
                     "Escapaste!"
                     return
 
         # ============================================
-        # CLERIGO - 7 opciones
+        # GENERAL
         # ============================================
-        elif clase == "Clerigo" or clase == "Clerigo2":
+        elif clase in ["General", "General2"]:
+            $ info_gen = "General - ENERGIA: " + str(heroe.get_energia())
             menu:
-                "Clerigo - ¿Que haras?"
-                "Bendicion Sangrada":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.5)
-                    "¡Bendicion! [danio] de danio."
-                "Luz Cegadora del Dia":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.5)
-                    $ registrar_habilidad_usada()
-                    "¡Luz! [danio] de danio."
-                "Exorcismo":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 3.5)
-                    $ registrar_habilidad_usada()
-                    "¡EXORCISMO! [danio] de danio."
-                "Palabras de Fe (reduce ATQ)":
-                    $ enemigo.set_ataque_basico(int(enemigo.get_ataque_basico() * 0.6))
-                    $ registrar_habilidad_usada()
-                    "ATQ enemigo reducido a [enemigo.get_ataque_basico()]"
-                "Escudo de Fe (+1000 DEF)":
-                    $ heroe.set_defensa(heroe.get_defensa() + 1000)
-                    $ registrar_habilidad_usada()
-                    "DEF: [heroe.get_defensa()]"
-                "Mi Fe es Inquebrantable (10x)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 10.0)
-                    $ registrar_habilidad_usada()
-                    "¡FE INQUEBRANTABLE! [danio] de danio."
-                "Recuperar Magia":
-                    $ heroe.set_magia(min(heroe.get_magia() + 200, 1000))
-                    "MAGIA: [heroe.get_magia()]"
-                "Huir":
-                    "Escapaste!"
-                    return
-
-        # ============================================
-        # GENERAL - 7 opciones
-        # ============================================
-        elif clase == "General" or clase == "General2":
-            menu:
-                "General - ¿Que haras?"
-                "Espada (Corte Mortal)":
-                    $ danio = aplicar_danio_basico(heroe, enemigo)
-                    "¡Corte! [danio] de danio."
-                "Canon de Mano":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.0)
-                    $ registrar_habilidad_usada()
-                    "¡Canon! [danio] de danio."
-                "Tiro Doble":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.5)
-                    $ registrar_habilidad_usada()
-                    "¡Tiro Doble! [danio] de danio."
+                "[info_gen]"
+                "Espada - 100 energia":
+                    $ danio = heroe.espada(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente energia! Recuperas 200."
+                    else:
+                        $ accion_realizada = True
+                        "Corte! [danio] de danio. ENERGIA: [heroe.get_energia()]"
+                "Canon de Mano - 250 energia":
+                    $ danio = heroe.canon_de_mano(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente energia!"
+                    else:
+                        $ accion_realizada = True
+                        "Canon! [danio] de danio. ENERGIA: [heroe.get_energia()]"
+                "Tiro Doble - 350 energia":
+                    $ danio = heroe.tiro_doble(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente energia!"
+                    else:
+                        $ accion_realizada = True
+                        "Tiro Doble! [danio] de danio. ENERGIA: [heroe.get_energia()]"
                 "Carga de Caballeria":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.0)
-                    $ registrar_habilidad_usada()
-                    "¡Carga! [danio] de danio."
-                "Canon Final (10x)":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 10.0)
-                    $ registrar_habilidad_usada()
-                    "¡CAÑON FINAL! [danio] de danio."
-                "Potenciador Cercano (+ATQ aliado)":
-                    $ registrar_habilidad_usada()
-                    "¡Aliados potenciados! ATQ: [heroe.get_ataque_basico()]"
-                "Potenciador Lejano":
-                    $ registrar_habilidad_usada()
-                    "Potenciador a distancia activado."
+                    $ danio = heroe.carga_de_caballeria(enemigo, 2)
+                    $ accion_realizada = True
+                    "Carga! [danio] de danio."
+                "Canon Final - 1000 energia":
+                    $ danio = heroe.canion_especial_final(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente energia!"
+                    else:
+                        $ accion_realizada = True
+                        "CANON FINAL! [danio] de danio."
                 "Huir":
                     "Escapaste!"
                     return
 
         # ============================================
-        # DRAGON - 8 opciones
+        # DRAGON
         # ============================================
-        elif clase == "Dragon" or clase == "Dragon2":
+        elif clase in ["Dragon", "Dragon2"]:
+            $ info_dr = "Dragon - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
             menu:
-                "Dragon - ¿Que haras?"
-                "Golpe Draconico":
-                    $ danio = aplicar_danio_basico(heroe, enemigo)
-                    "¡Golpe! [danio] de danio."
-                "Llamarada Infernal":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.0)
-                    $ registrar_habilidad_usada()
-                    "¡Llamarada! [danio] de danio."
-                "Ataque de Espinas":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 1.5)
-                    $ registrar_habilidad_usada()
-                    "¡Espinas! [danio] de danio."
-                "Rayo de Luz":
-                    $ danio = aplicar_danio_magico(heroe, enemigo, 2.2)
-                    $ registrar_habilidad_usada()
-                    "¡Rayo de Luz! [danio] de danio."
-                "Escamas Reflectantes":
-                    $ registrar_habilidad_usada()
-                    "¡Escamas activadas por 2 turnos!"
+                "[info_dr]"
+                "Ataque basico - 100 magia":
+                    $ danio = heroe.ataque_basico(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia! Recuperas 50."
+                    else:
+                        $ accion_realizada = True
+                        "Golpe! [danio] de danio."
+                "Llamarada Infernal - 200 magia":
+                    $ danio = heroe.ataque_llamarada_infernal(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Llamarada! [danio] de danio."
+                "Ataque de Espinas - 100 magia":
+                    $ danio = heroe.ataque_espinas(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Espinas! [danio] de danio."
+                "Rayo de Luz - 150 magia":
+                    $ danio = heroe.ataque_luz(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Rayo de Luz! [danio] de danio."
+                "Escamas Reflectantes - 30 magia":
+                    $ resultado = heroe.escamas_reflectantes()
+                    if resultado == False:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Escamas activadas!"
                 "Regeneracion":
-                    $ heroe.set_vida(min(heroe.get_vida() + 30, 450))
-                    "HP: [heroe.get_vida()]"
-                "Recuperar Magia":
-                    $ heroe.set_magia(min(heroe.get_magia() + 100, 500))
+                    $ restaurado = heroe.regeneracion_dragon()
+                    $ accion_realizada = True
+                    "HP recuperado: [restaurado]"
+                "Recuperar Magia +100":
+                    $ heroe.recuperacion_draconica(100)
+                    $ accion_realizada = True
                     "MAGIA: [heroe.get_magia()]"
                 "Huir":
                     "Escapaste!"
                     return
 
-        # FALLBACK
         else:
             menu:
-                "[clase] - ¿Que haras?"
+                "[clase] - Que haras?"
                 "Atacar":
                     $ danio = aplicar_danio_basico(heroe, enemigo)
+                    $ accion_realizada = True
                     "Atacas. [danio] de danio."
                 "Huir":
                     "Escapaste!"
                     return
 
+        # MOSTRAR STATS ACTUALIZADOS DESPUES DE LA ACCION
+        if accion_realizada:
+            $ stats_post = get_stats_personaje(heroe)
+            "[nombre_heroe] ahora tiene: [stats_post]"
+
         if not enemigo.esta_vivo():
-            "¡[nombre_enemigo] HA SIDO DERROTADO!"
+            "[nombre_enemigo] HA SIDO DERROTADO!"
             $ enemigo.set_visible(False)
-            $ registrar_muerte_enemigo()
             return
 
         python:
@@ -811,6 +979,7 @@ label combate(heroe, enemigo):
                     else:
                         ia.evaluar(enemigo, heroe)
                 except Exception as e:
+                    print("[IA ERROR] " + str(e))
                     danio_enemigo = max(5, enemigo.get_ataque_basico() // 2)
                     heroe.set_vida(max(0, heroe.get_vida() - danio_enemigo))
                     renpy.say("", "Te hizo " + str(danio_enemigo) + " de danio.")
@@ -821,10 +990,18 @@ label combate(heroe, enemigo):
 
         if not heroe.esta_vivo():
             $ nombre_heroe_muerto = heroe.get_clase()
-            "¡[nombre_heroe_muerto] HA CAIDO!"
+            "[nombre_heroe_muerto] HA CAIDO!"
             $ heroe.set_visible(False)
+            python:
+                todos_muertos = True
+                for h in store.heroes:
+                    if h.esta_vivo():
+                        todos_muertos = False
+                        break
+                if todos_muertos:
+                    store.resultado_batalla = "derrota"
+                    store.partida_terminada = True
             return
-
     return
 
 # ============================================================
@@ -850,13 +1027,10 @@ label combate_versus(atacante, defensor):
     return
 
 # ============================================================
-# ARMAR EJERCITO (MODO NORMAL)
+# ARMAR EJERCITO
 # ============================================================
 label armar_ejercito:
     $ total = len(ejercito)
-    if total >= maxima_cantidad_unidades:
-        "Ya tenes [maxima_cantidad_unidades] unidades. No podes agregar mas!"
-        jump comenzar_batalla
 
     python:
         posiciones_ejercito = [(x, y) for x in range(8) for y in (3, 4)]
@@ -866,79 +1040,84 @@ label armar_ejercito:
             casillas_disponibles = [(0, 4)]
         px, py = random.choice(casillas_disponibles)
 
-    menu:
-        "Elegi una unidad para tu ejercito ([total]/[maxima_cantidad_unidades]):"
-        "Mago":
-            $ unidad = Mago("Mago", 200, 25, 15, 4, 3, 30, px, py, 0, True, 100, 10, 10, 10)
-            $ ejercito.append(unidad)
-            "Agregaste un Mago."
-            jump armar_ejercito
-        "General":
-            $ unidad = General("General", 250, 30, 20, 3, 2, 40, px, py, 0, True, 1000, 500)
-            $ ejercito.append(unidad)
-            "Agregaste un General."
-            jump armar_ejercito
-        "Archimago":
-            $ unidad = ArchiMago("Archimago", 300, 35, 25, 3, 3, 50, px, py, 0, True, 1500, 100)
-            $ ejercito.append(unidad)
-            "Agregaste un Archimago."
-            jump armar_ejercito
-        "Guerrero":
-            $ unidad = Guerrero("Guerrero", 150, 40, 20, 4, 1, 35, px, py, 0, True)
-            $ ejercito.append(unidad)
-            "Agregaste un Guerrero."
-            jump armar_ejercito
-        "Dragon":
-            $ unidad = Dragon("Dragon", 300, 60, 30, 2, 3, 70, px, py, 0, True, 500, 0, 0)
-            $ ejercito.append(unidad)
-            "Agregaste un Dragon."
-            jump armar_ejercito
-        "Arquero":
-            $ unidad = Arquero("Arquero", 120, 25, 12, 4, 4, 30, px, py, 0, True, 30, 10)
-            $ ejercito.append(unidad)
-            "Agregaste un Arquero."
-            jump armar_ejercito
-        "Clerigo":
-            $ unidad = Clerigo("Clerigo", 150, 15, 18, 3, 2, 20, px, py, 0, True, 100)
-            $ ejercito.append(unidad)
-            "Agregaste un Clerigo."
-            jump armar_ejercito
-        "Lich":
-            $ unidad = Lich("Lich", 180, 28, 20, 3, 2, 45, px, py, 0, True, 200)
-            $ ejercito.append(unidad)
-            "Agregaste un Lich."
-            jump armar_ejercito
-        "Terminar de armar ejercito":
-            if total == 0:
-                "No tenes unidades, selecciona al menos una!"
+    if total >= maxima_cantidad_unidades:
+        "Ya tenes [maxima_cantidad_unidades] unidades. Ahora elegi un nivel:"
+        jump elegir_nivel
+    else:
+        menu:
+            "Elegi una unidad para tu ejercito ([total]/[maxima_cantidad_unidades]):"
+            "Mago":
+                $ unidad = Mago("Mago", 200, 25, 15, 4, 3, 30, px, py, 0, True, 100, 100, 10, 10, 10)
+                $ ejercito.append(unidad)
+                "Agregaste un Mago."
                 jump armar_ejercito
-            else:
-                menu:
-                    "Elegi un nivel:"
-                    "Nivel 1 - LA INVASION DE LOS GOBLINS":
-                        jump nivel1
-                    "Nivel 2 - LA CRIPTA OLVIDADA":
-                        jump nivel2
-                    "Nivel 3 - EL BOSQUE DE LAS SOMBRAS":
-                        jump nivel3
-                    "Nivel 4 - EL TEMPLO DE LOS CAIDOS":
-                        jump nivel4
-                    "Nivel 5 - LA FORTALEZA DEL GENERAL":
-                        jump nivel5
-                    "Nivel 6 - EL ABISMO DE LOS CONDENADOS":
-                        jump nivel6
-                    "Nivel 7 - EL TRONO DEL SENOR OSCURO":
-                        jump nivel7
-                    "Nivel Aleatorio":
-                        jump nivel_aleatorio
+            "General":
+                $ unidad = General("General", 250, 30, 20, 3, 2, 40, px, py, 0, True, 1000, 500)
+                $ ejercito.append(unidad)
+                "Agregaste un General."
+                jump armar_ejercito
+            "Archimago":
+                $ unidad = ArchiMago("Archimago", 300, 35, 25, 3, 3, 50, px, py, 0, True, 1500, 100)
+                $ ejercito.append(unidad)
+                "Agregaste un Archimago."
+                jump armar_ejercito
+            "Guerrero":
+                $ unidad = Guerrero("Guerrero", 150, 40, 20, 4, 1, 35, px, py, 0, True)
+                $ ejercito.append(unidad)
+                "Agregaste un Guerrero."
+                jump armar_ejercito
+            "Dragon":
+                $ unidad = Dragon("Dragon", 300, 60, 30, 2, 3, 70, px, py, 0, True, 500, 0, 0)
+                $ ejercito.append(unidad)
+                "Agregaste un Dragon."
+                jump armar_ejercito
+            "Arquero":
+                $ unidad = Arquero("Arquero", 120, 25, 12, 4, 4, 30, px, py, 0, True, 30, 10)
+                $ ejercito.append(unidad)
+                "Agregaste un Arquero."
+                jump armar_ejercito
+            "Clerigo":
+                $ unidad = Clerigo("Clerigo", 150, 15, 18, 3, 2, 20, px, py, 0, True, 100)
+                $ ejercito.append(unidad)
+                "Agregaste un Clerigo."
+                jump armar_ejercito
+            "Lich":
+                $ unidad = Lich("Lich", 180, 28, 20, 3, 2, 45, px, py, 0, True, 200)
+                $ ejercito.append(unidad)
+                "Agregaste un Lich."
+                jump armar_ejercito
+            "Terminar de armar ejercito":
+                if total == 0:
+                    "No tenes unidades, selecciona al menos una!"
+                    jump armar_ejercito
+                else:
+                    jump elegir_nivel
+
+label elegir_nivel:
+    menu:
+        "Elegi un nivel:"
+        "Nivel 1 - LA INVASION DE LOS GOBLINS":
+            jump nivel1
+        "Nivel 2 - LA CRIPTA OLVIDADA":
+            jump nivel2
+        "Nivel 3 - EL BOSQUE DE LAS SOMBRAS":
+            jump nivel3
+        "Nivel 4 - EL TEMPLO DE LOS CAIDOS":
+            jump nivel4
+        "Nivel 5 - LA FORTALEZA DEL GENERAL":
+            jump nivel5
+        "Nivel 6 - EL ABISMO DE LOS CONDENADOS":
+            jump nivel6
+        "Nivel 7 - EL TRONO DEL SENOR OSCURO":
+            jump nivel7
+        "Nivel Aleatorio":
+            jump nivel_aleatorio
 
 # ============================================================
 # ARMAR EJERCITO J1 (VERSUS)
 # ============================================================
 label armar_ejercito_j1:
     $ total = len(ejercito_j1)
-    if total >= maxima_cantidad_unidades:
-        jump armar_ejercito_j2
 
     python:
         posiciones_ejercito = [(x, y) for x in range(8) for y in (3, 4)]
@@ -948,34 +1127,36 @@ label armar_ejercito_j1:
             casillas_disponibles = [(0, 4)]
         px, py = random.choice(casillas_disponibles)
 
-    menu:
-        "JUGADOR 1 - Elegi una unidad ([total]/[maxima_cantidad_unidades]):"
-        "Mago":
-            $ ejercito_j1.append(Mago("J1_Mago", 200, 25, 15, 4, 3, 30, px, py, 0, True, 100, 10, 10, 10))
-            jump armar_ejercito_j1
-        "Guerrero":
-            $ ejercito_j1.append(Guerrero("J1_Guerrero", 150, 40, 20, 4, 1, 35, px, py, 0, True))
-            jump armar_ejercito_j1
-        "Arquero":
-            $ ejercito_j1.append(Arquero("J1_Arquero", 120, 25, 12, 4, 4, 30, px, py, 0, True, 30, 10))
-            jump armar_ejercito_j1
-        "Dragon":
-            $ ejercito_j1.append(Dragon("J1_Dragon", 300, 60, 30, 2, 3, 70, px, py, 0, True, 500, 0, 0))
-            jump armar_ejercito_j1
-        "Terminar":
-            if total == 0:
-                "Elegi al menos una unidad!"
+    if total >= maxima_cantidad_unidades:
+        "Jugador 1 tiene [maxima_cantidad_unidades] unidades. Turno del Jugador 2."
+        jump armar_ejercito_j2
+    else:
+        menu:
+            "JUGADOR 1 - Elegi una unidad ([total]/[maxima_cantidad_unidades]):"
+            "Mago":
+                $ ejercito_j1.append(Mago("J1_Mago", 200, 25, 15, 4, 3, 30, px, py, 0, True, 100, 100, 10, 10, 10))
                 jump armar_ejercito_j1
-            else:
-                jump armar_ejercito_j2
+            "Guerrero":
+                $ ejercito_j1.append(Guerrero("J1_Guerrero", 150, 40, 20, 4, 1, 35, px, py, 0, True))
+                jump armar_ejercito_j1
+            "Arquero":
+                $ ejercito_j1.append(Arquero("J1_Arquero", 120, 25, 12, 4, 4, 30, px, py, 0, True, 30, 10))
+                jump armar_ejercito_j1
+            "Dragon":
+                $ ejercito_j1.append(Dragon("J1_Dragon", 300, 60, 30, 2, 3, 70, px, py, 0, True, 500, 0, 0))
+                jump armar_ejercito_j1
+            "Terminar":
+                if total == 0:
+                    "Elegi al menos una unidad!"
+                    jump armar_ejercito_j1
+                else:
+                    jump armar_ejercito_j2
 
 # ============================================================
 # ARMAR EJERCITO J2 (VERSUS)
 # ============================================================
 label armar_ejercito_j2:
     $ total = len(ejercito_j2)
-    if total >= maxima_cantidad_unidades:
-        jump versus_inicio_batalla
 
     python:
         posiciones_ejercito = [(x, y) for x in range(8) for y in (0, 1)]
@@ -985,26 +1166,30 @@ label armar_ejercito_j2:
             casillas_disponibles = [(0, 0)]
         px, py = random.choice(casillas_disponibles)
 
-    menu:
-        "JUGADOR 2 - Elegi una unidad ([total]/[maxima_cantidad_unidades]):"
-        "Mago":
-            $ ejercito_j2.append(Mago("J2_Mago", 200, 25, 15, 4, 3, 30, px, py, 0, True, 100, 10, 10, 10))
-            jump armar_ejercito_j2
-        "Guerrero":
-            $ ejercito_j2.append(Guerrero("J2_Guerrero", 150, 40, 20, 4, 1, 35, px, py, 0, True))
-            jump armar_ejercito_j2
-        "Arquero":
-            $ ejercito_j2.append(Arquero("J2_Arquero", 120, 25, 12, 4, 4, 30, px, py, 0, True, 30, 10))
-            jump armar_ejercito_j2
-        "Dragon":
-            $ ejercito_j2.append(Dragon("J2_Dragon", 300, 60, 30, 2, 3, 70, px, py, 0, True, 500, 0, 0))
-            jump armar_ejercito_j2
-        "Terminar":
-            if total == 0:
-                "Elegi al menos una unidad!"
+    if total >= maxima_cantidad_unidades:
+        "Jugador 2 tiene [maxima_cantidad_unidades] unidades. Empieza la batalla!"
+        jump versus_inicio_batalla
+    else:
+        menu:
+            "JUGADOR 2 - Elegi una unidad ([total]/[maxima_cantidad_unidades]):"
+            "Mago":
+                $ ejercito_j2.append(Mago("J2_Mago", 200, 25, 15, 4, 3, 30, px, py, 0, True, 100, 100, 10, 10, 10))
                 jump armar_ejercito_j2
-            else:
-                jump versus_inicio_batalla
+            "Guerrero":
+                $ ejercito_j2.append(Guerrero("J2_Guerrero", 150, 40, 20, 4, 1, 35, px, py, 0, True))
+                jump armar_ejercito_j2
+            "Arquero":
+                $ ejercito_j2.append(Arquero("J2_Arquero", 120, 25, 12, 4, 4, 30, px, py, 0, True, 30, 10))
+                jump armar_ejercito_j2
+            "Dragon":
+                $ ejercito_j2.append(Dragon("J2_Dragon", 300, 60, 30, 2, 3, 70, px, py, 0, True, 500, 0, 0))
+                jump armar_ejercito_j2
+            "Terminar":
+                if total == 0:
+                    "Elegi al menos una unidad!"
+                    jump armar_ejercito_j2
+                else:
+                    jump versus_inicio_batalla
 
 # ============================================================
 # VERSUS
@@ -1014,7 +1199,7 @@ label versus_inicio:
     $ ejercito_j1 = []
     $ ejercito_j2 = []
     "MODO VERSUS - 2 JUGADORES"
-    "Jugador 1: Elegi tu ejercito (abajo)"
+    "Jugador 1: Elegi tu ejercito"
     jump armar_ejercito_j1
 
 label versus_inicio_batalla:
@@ -1023,7 +1208,7 @@ label versus_inicio_batalla:
     $ unidad_seleccionada = None
     $ partida_terminada = False
     $ resultado_batalla = ""
-    "¡Empieza la batalla!"
+    "Empieza la batalla!"
     call screen tablero_versus
 
     if resultado_batalla == "j1_gana":
@@ -1034,21 +1219,22 @@ label versus_inicio_batalla:
         $ renpy.full_restart()
 
 label versus_j1_gana:
-    "¡JUGADOR 1 GANA!"
+    "JUGADOR 1 GANA!"
     $ renpy.full_restart()
 
 label versus_j2_gana:
-    "¡JUGADOR 2 GANA!"
+    "JUGADOR 2 GANA!"
     $ renpy.full_restart()
 
 # ============================================================
-# COMENZAR BATALLA (MODO NORMAL)
+# COMENZAR BATALLA
 # ============================================================
 label comenzar_batalla:
-    "¡Tu ejercito esta listo!"
-    "Misión: ¡Elimina a todos los enemigos del tablero!"
+    "Tu ejercito esta listo!"
+    "Mision: Elimina a todos los enemigos del tablero!"
     $ partida_terminada = False
     $ resultado_batalla = ""
+    $ boss_spawneado = False
     call screen tablero
 
     if resultado_batalla == "victoria":
@@ -1059,12 +1245,11 @@ label comenzar_batalla:
         $ renpy.full_restart()
 
 # ============================================================
-# VICTORIA - ¡ACÁ ESTÁ EL FIX DE SIGUIENTE NIVEL!
+# VICTORIA
 # ============================================================
 label victoria_jugador:
     $ guardar_partida("partida")
 
-    # Mostrar diálogo de victoria según nivel
     if nivel_actual == 1:
         call dialogo_nivel1_victoria
     elif nivel_actual == 2:
@@ -1079,16 +1264,15 @@ label victoria_jugador:
         call dialogo_nivel6_victoria
     elif nivel_actual == 7:
         call dialogo_nivel7_victoria
-        "¡HAS COMPLETADO EL JUEGO!"
+        "HAS COMPLETADO EL JUEGO!"
         jump menu_principal
     else:
-        "¡Nivel completado!"
+        "Nivel completado!"
 
-    # Menú de opciones post-victoria
     if nivel_actual >= 1 and nivel_actual <= 6:
         $ siguiente = nivel_actual + 1
         menu:
-            "¿Que queres hacer?"
+            "Que queres hacer?"
             "Siguiente Nivel ([siguiente])":
                 $ nivel_actual = siguiente
                 $ renpy.jump("nivel" + str(nivel_actual))
@@ -1100,7 +1284,7 @@ label victoria_jugador:
                 $ renpy.full_restart()
     else:
         menu:
-            "¿Que queres hacer?"
+            "Que queres hacer?"
             "Rearmar Ejercito":
                 jump armar_ejercito
             "Salir al menu":
@@ -1109,7 +1293,7 @@ label victoria_jugador:
 label derrotado:
     "GAME OVER. Tus heroes han caido."
     menu:
-        "¿Que queres hacer?"
+        "Que queres hacer?"
         "Reiniciar este Nivel":
             $ renpy.jump("nivel" + str(nivel_actual))
         "Rearmar Ejercito":
@@ -1159,9 +1343,7 @@ screen tablero():
                     ypos OFFSET_Y + unidad.get_y() * CASILLA_H + 25
                     xsize 100
                     ysize 100
-                    add {"Dragon": "Dragon.png", "Lich": "Lich.png", "Archimago": "Archimago.png",
-                        "Mago": "Mago.png", "Clerigo": "Clerigo.png", "Guerrero": "Guerrero.png",
-                        "General": "General.png", "Arquero": "Arquero.png"}.get(unidad.get_clase(), "default.png")
+                    add obtener_imagen_enemigo(unidad.get_clase())
 
         for heroe in heroes:
             if heroe.get_visible():
@@ -1186,9 +1368,7 @@ screen tablero():
                     ypos OFFSET_Y + unidad_ejercito.get_y() * CASILLA_H + 25
                     xsize 56
                     ysize 56
-                    add {"Dragon": "Dragon.png", "Lich": "Lich.png", "Archimago": "Archimago.png",
-                        "Mago": "Mago.png", "Clerigo": "Clerigo.png", "Guerrero": "Guerrero.png",
-                        "General": "General.png", "Arquero": "Arquero.png"}.get(unidad_ejercito.get_clase(), "default.png")
+                    add obtener_imagen_enemigo(unidad_ejercito.get_clase())
 
         frame:
             xpos 20
@@ -1235,9 +1415,7 @@ screen tablero_versus():
                     ypos OFFSET_Y + unidad.get_y() * CASILLA_H + 25
                     xsize 100
                     ysize 100
-                    add {"Dragon": "Dragon.png", "Lich": "Lich.png", "Archimago": "Archimago.png",
-                        "Mago": "Mago.png", "Clerigo": "Clerigo.png", "Guerrero": "Guerrero.png",
-                        "General": "General.png", "Arquero": "Arquero.png"}.get(unidad.get_clase(), "default.png")
+                    add obtener_imagen_enemigo(unidad.get_clase())
 
         for unidad in ejercito_j1:
             if unidad.get_visible():
@@ -1247,9 +1425,7 @@ screen tablero_versus():
                     ypos OFFSET_Y + unidad.get_y() * CASILLA_H + 25
                     xsize 100
                     ysize 100
-                    add {"Dragon": "Dragon.png", "Lich": "Lich.png", "Archimago": "Archimago.png",
-                        "Mago": "Mago.png", "Clerigo": "Clerigo.png", "Guerrero": "Guerrero.png",
-                        "General": "General.png", "Arquero": "Arquero.png"}.get(unidad.get_clase(), "default.png")
+                    add obtener_imagen_enemigo(unidad.get_clase())
 
         frame:
             xpos 20
@@ -1265,7 +1441,6 @@ screen tablero_versus():
 # ============================================================
 # SCREEN: SELECCION DE HEROES
 # ============================================================
-
 screen seleccion_heroes():
     add "seleccion_heroe.png"
     modal True
@@ -1274,36 +1449,30 @@ screen seleccion_heroes():
 
     if seleccion_heroe:
         vbox:
-          
             imagebutton:
-                id "Kazuki"  
-                idle "kasuki_idle.png"    
-                hover "kasuki_hover.png"  
+                id "Kazuki"
+                idle "kasuki_idle.png"
+                hover "kasuki_hover.png"
                 focus_mask True
-                action [SetVariable("heroe_actual", heroes[0]), Return()]  
-
+                action [SetVariable("heroe_actual", heroes[0]), Return()]
 
     if seleccion_heroe:
         vbox:
-            
             imagebutton:
-                id "Lyra"  
-                idle "elfa_idle.png"    
-                hover "elfa_hover.png"  
+                id "Lyra"
+                idle "elfa_idle.png"
+                hover "elfa_hover.png"
                 focus_mask True
                 action [SetVariable("heroe_actual", heroes[1]), Return()]
 
-
     if seleccion_heroe:
         vbox:
-           
             imagebutton:
-                id "Gromm"  
-                idle "enano_idle.png"    
-                hover "enano_hover.png"  
+                id "Gromm"
+                idle "enano_idle.png"
+                hover "enano_hover.png"
                 focus_mask True
                 action [SetVariable("heroe_actual", heroes[2]), Return()]
-
 
 # ============================================================
 # SPLASHSCREEN
@@ -1327,7 +1496,7 @@ label inicio:
         except:
             pass
     $ heroes = crear_heroes()
-    $ enemigos = crear_enemigos()
+    $ enemigos = []
     "Bienvenido a RE: MERCENARY - Estrategia por turnos"
     call screen seleccion_heroes
 

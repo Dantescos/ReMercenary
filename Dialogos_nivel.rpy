@@ -6,9 +6,10 @@ define kazuki = Character("Kazuki", color="#88ccff")
 define lyra = Character("Lyra", color="#ff88cc")
 define gromm = Character("Gromm", color="#008000")
 define senor_oscuro = Character("Senor Oscuro", color="#8B0000")
+define traidor = Character("Traidor", color="#FF6600")
 
 # ============================================================
-# NIVEL 1
+# NIVEL 1: LA INVASION DE LOS GOBLINS (Boss: Ogro)
 # ============================================================
 label dialogo_nivel1_inicio:
     scene black
@@ -23,14 +24,14 @@ label dialogo_nivel1_inicio:
     gromm  "Por lo visto no solo se han vuelto mas agresivos, sino que mas organizados."
     kazuki "¿Que quieres decir, Lyra?"
     lyra   "Que alguien los esta controlando. Y quien los controle, tiene un plan."
-    gromm  "Podria ser un hechicero poderoso el que los controla o un nigromante."
+    gromm  "Podria ser un hechicero poderoso o un nigromante."
     kazuki "Entonces tenemos que detenerlos antes de que sea tarde."
-    gromm  "Juntos podremos acabar contra esos goblins y salvar la aldea."
+    gromm  "Juntos podremos acabar con esos goblins y salvar la aldea."
     lyra   "¿Estan seguros? Podrian morir."
     kazuki "Morir ya lo hice una vez. No me asusta."
     gromm  "Niña, estoy tan seguro como que los seguiria hasta el infierno mismo."
     lyra   "..."
-    kazuki "Vamos. Tengo un plan para salvar la aldea."
+    kazuki "Vamos. Un Ogro lidera a los goblins. Si lo matamos, la horda se dispersa."
     hide kazuki
     hide lyra
     hide gromm
@@ -41,13 +42,13 @@ label dialogo_nivel1_victoria:
     show kazuki at left
     show lyra at right
     show gromm at center
-    "Los goblins yacen derrotados. La aldea esta a salvo."
+    "El Ogro cae con un golpe seco. Los goblins restantes huyen despavoridos."
     lyra    "Lo logramos. Pero fue demasiado facil."
-    kazuki  "¿Facil? Casi me mata el orco."
+    kazuki  "¿Facil? Casi me mata el ogro ese."
     gromm   "Si, esto es extraño."
     lyra    "Me refiero a que no deberia haber sido tan facil. Los goblins no tienen esa fuerza."
     kazuki  "Entonces hay algo mas grande detras."
-    gromm   "Se los dije, seguro es algun hechicero o algun brujo."
+    gromm   "Se los dije, seguro es algun hechicero."
     lyra    "El Imperio Oscuro. Tiene que ser ellos."
     kazuki  "Si es asi, esto recien empieza."
     gromm   "¿Y como estas tan segura, elfa?"
@@ -60,7 +61,7 @@ label dialogo_nivel1_victoria:
     return
 
 # ============================================================
-# NIVEL 2
+# NIVEL 2: LA CRIPTA OLVIDADA (Boss: Esqueleto)
 # ============================================================
 label dialogo_nivel2_inicio:
     scene black
@@ -73,9 +74,9 @@ label dialogo_nivel2_inicio:
     lyra   "Por eso estamos aca. Alguien los esta despertando."
     kazuki "¿Tu crees que sea un nigromante?"
     lyra   "O algo peor. Un nigromante solo reanima cadaveres. Pero esto..."
-    lyra   "Esto es diferente. Los muertos estan organizados. Como un ejercito."
+    lyra   "Los muertos estan organizados. Como un ejercito."
     gromm  "Entonces hay alguien detras. Alguien con un plan."
-    kazuki "Vamos. Averiguemos quien es."
+    kazuki "Vamos. El Esqueleto nigromante debe estar en el centro de la cripta."
     gromm  "Y si nos encontramos con el, le cortare la cabeza con mi hacha."
     lyra   "Siempre tan sutil, enano."
     gromm  "Es lo que mejor se me da, niña."
@@ -89,11 +90,11 @@ label dialogo_nivel2_victoria:
     show kazuki at left
     show lyra at right
     show gromm at center
-    "La Cripta esta en silencio. Los muertos vuelven a descansar."
-    kazuki "Encontre esto entre los restos del Dragon."
+    "El Esqueleto nigromante se desmorona. Su craneo rueda por el suelo."
+    kazuki "Encontre esto entre sus ropas."
     "Kazuki sostiene un medallon con el simbolo del Imperio Oscuro."
-    lyra   "Es la marca del General Oscuro. El segundo al mando."
-    kazuki "Entonces el esta detras de la reanimacion."
+    lyra   "Es la marca del Imperio. Alguien de alto rango esta detras."
+    kazuki "Entonces esto es mas grande de lo que pensabamos."
     gromm  "Un general necesita un ejercito. Y que mejor que los muertos."
     lyra   "Tiene sentido. Pero hay algo que no me cierra."
     kazuki "¿Que cosa?"
@@ -108,7 +109,7 @@ label dialogo_nivel2_victoria:
     return
 
 # ============================================================
-# NIVEL 3
+# NIVEL 3: EL BOSQUE DE LAS SOMBRAS (Boss: Traidor)
 # ============================================================
 label dialogo_nivel3_inicio:
     scene black
@@ -122,10 +123,13 @@ label dialogo_nivel3_inicio:
     lyra   "No es tu culpa. Pero encontrar esto asi... es como perderlo dos veces."
     gromm  "Los arboles estan vivos, pero no de la forma correcta. Algo los corrompio."
     kazuki "El mismo algo que reanima a los muertos. Tenemos que seguir avanzando."
-    lyra   "Cuidado. En este bosque, los arboles tambien atacan."
-    gromm  "Que ataquen. Yo les respondo con mi hacha."
-    lyra   "Gromm, no todo se resuelve con violencia."
-    gromm  "En mi experiencia, casi todo si."
+    lyra   "Cuidado. Hay alguien aqui. Siento su presencia."
+    gromm  "Que ataque. Yo les respondo con mi hacha."
+    "Una figura encapuchada aparece entre las sombras."
+    traidor "Los estaba esperando. Que bueno que vinieron a morir."
+    kazuki "¡Tu! ¡Eres el Traidor que vendio al rey!"
+    traidor "Traicion es una palabra fea. Yo lo llamo... supervivencia."
+    gromm  "¡Vas a morir por lo que hiciste!"
     hide kazuki
     hide lyra
     hide gromm
@@ -136,11 +140,15 @@ label dialogo_nivel3_victoria:
     show kazuki at left
     show lyra at right
     show gromm at center
-    "El Ogro Berserker cae. El bosque recupera un poco de su color."
-    lyra   "El Ogro tenia esto."
+    "El Traidor cae de rodillas. Su mascara se rompe."
+    traidor "Miserables... el Senor Oscuro... no perdonara esto..."
+    kazuki "El Senor Oscuro vendra por nosotros, ya lo sabemos."
+    traidor "Viene... viene por todo Veridia. Y ustedes... no podran detenerlo..."
+    "El Traidor exhala su ultimo aliento."
+    lyra   "El Traidor tenia esto."
     "Lyra sostiene un mapa de Veridia con marcas rojas."
     kazuki "¿Que son estas marcas?"
-    lyra   "Ubicaciones del Imperio. El General esta reuniendo su ejercito en el Templo de los Caidos."
+    lyra   "Ubicaciones del Imperio. El Senor Oscuro esta reuniendo su ejercito en el Templo de los Caidos."
     kazuki "Entonces iremos alli."
     gromm  "Ya era hora de pelear contra algo mas grande."
     lyra   "Espera. Hay algo mas. Esta marca... esta justo en mi aldea."
@@ -155,7 +163,7 @@ label dialogo_nivel3_victoria:
     return
 
 # ============================================================
-# NIVEL 4
+# NIVEL 4: EL TEMPLO DE LOS CAIDOS (Boss: Caballero Corrompido)
 # ============================================================
 label dialogo_nivel4_inicio:
     scene black
@@ -169,9 +177,9 @@ label dialogo_nivel4_inicio:
     gromm  "Si. Fue mi primera batalla como soldado. Perdimos contra el Imperio."
     lyra   "Esta vez sera diferente."
     gromm  "Eso espero. Porque si perdemos, Veridia cae."
-    kazuki "Activen los interruptores. Con eso abriremos el camino al General."
-    lyra   "¿Y si no los encontramos todos?"
-    kazuki "Entonces no saldremos. Y esto habra sido en vano."
+    kazuki "El Caballero Corrompido custodia el templo. Fue un heroe, ahora es un monstruo."
+    lyra   "¿Puede ser salvado?"
+    kazuki "No lo se. Pero si esta corrompido, no nos quedara otra opcion."
     gromm  "Sin presion, ¿eh?"
     hide kazuki
     hide lyra
@@ -183,15 +191,15 @@ label dialogo_nivel4_victoria:
     show kazuki at left
     show lyra at right
     show gromm at center
-    "El Caballero Caido se desmorona. Su armadura negra cae al suelo."
-    kazuki "Pobre hombre. Fue corrompido por el Imperio."
-    lyra   "Era el capitan de la guardia real segun las notas que encontre."
-    kazuki "¿Y como termino asi convertido en un ser corrompido?"
-    lyra   "El General lo traiciono. Le prometio poder y lo convirtio en un monstruo."
-    gromm  "Conocia a ese hombre. Era un buen soldado. Un buen lider."
-    kazuki "Gromm..."
-    gromm  "El General pagara por esto. Lo juro por mi barba."
-    lyra   "Entonces el General no es solo un enemigo. Es un traidor."
+    "El Caballero Corrompido se desmorona. Su armadura negra cae al suelo."
+    "Debajo, hay un hombre viejo. Su rostro es familiar."
+    gromm  "¡Por todos los dioses! ¡Es el Capitan Aldric!"
+    kazuki "¿Lo conoces?"
+    gromm  "Era el capitan de la guardia real. Un buen hombre. Un buen lider."
+    lyra   "El Imperio lo corrompio. Le prometio poder y lo convirtio en un monstruo."
+    kazuki "Pobre hombre. Fue traicionado por los que servia."
+    gromm  "El Senor Oscuro pagara por esto. Lo juro por mi barba."
+    lyra   "Entonces el Senor Oscuro no es solo un enemigo. Es un monstruo que corrompe a los heroes."
     kazuki "Por eso tenemos que detenerlo. No solo por Veridia. Por todos los que cayeron."
     hide kazuki
     hide lyra
@@ -199,21 +207,21 @@ label dialogo_nivel4_victoria:
     return
 
 # ============================================================
-# NIVEL 5
+# NIVEL 5: LA FORTALEZA DEL GENERAL (Boss: Senor Oscuro Humano)
 # ============================================================
 label dialogo_nivel5_inicio:
     scene black
-    "La Fortaleza del General se alza sobre una colina, rodeada de un foso de fuego."
+    "La Fortaleza del Imperio se alza sobre una colina, rodeada de un foso de fuego."
     "Es el corazon del ejercito enemigo."
     show kazuki at left
     show lyra at right
     show gromm at center
     gromm  "Esta es la fortaleza mas grande que he visto."
-    lyra   "El General debe estar en el centro. Con sus tropas de elite."
+    lyra   "El Senor Oscuro debe estar en el centro. Con sus tropas de elite."
     kazuki "Entonces iremos directo al centro. Sin escalas."
     gromm  "Me gusta como piensas, muchacho. Siempre directo al grano."
-    lyra   "Pero tengan cuidado. El General invoca esqueletos."
-    kazuki "Entonces lo matamos antes de que invoque demasiados. Es simple."
+    lyra   "Pero tengan cuidado. El Senor Oscuro es poderoso. Dicen que puede transformarse."
+    kazuki "Entonces lo matamos antes de que lo haga. Es simple."
     gromm  "Simple dice. Nada es simple cuando hay magia de por medio."
     kazuki "Por eso tenemos a Lyra. Para que sea simple."
     lyra   "Pero mi magia es distinta."
@@ -237,31 +245,36 @@ label dialogo_nivel5_victoria:
     show kazuki at left
     show lyra at right
     show gromm at center
-    "El General Oscuro cae. Su capa roja se mancha de sangre."
-    kazuki "Se acabo. El ejercito del Imperio esta en retirada."
-    lyra   "Por ahora. Pero el Senor Oscuro sigue vivo."
-    kazuki "Lo se. Y mientras viva, la guerra no terminara."
-    gromm  "Entonces vamos por el. Directo al Abismo."
-    lyra   "Espera. El Abismo no es un lugar comun. Es una caverna infernal."
-    kazuki "¿Y eso que importa?"
-    lyra   "Que si entramos, tal vez no salgamos."
-    gromm  "Entonces saldremos por la puerta que hagamos con nuestras espadas."
-    kazuki "Eso no tiene sentido, Gromm."
-    gromm  "Lo se. Pero suena bien, ¿no?"
-    lyra   "..."
-    kazuki "Vamos. Al Abismo."
+    show senor_oscuro at center
+    "El Senor Oscuro, en su forma humana, cae de rodillas. Su capa roja se mancha de sangre."
+    senor_oscuro "Impresionante... nadie habia llegado tan lejos..."
+    kazuki "Se acabo. El Imperio esta en retirada."
+    senor_oscuro "¿Crees que esto es el final? Patetico."
+    "El Senor Oscuro se levanta. Su cuerpo se retuerce."
+    senor_oscuro "¡Entonces mira mi VERDADERO poder, humano insolente!"
+    hide senor_oscuro
+    "El Senor Oscuro se transforma. Su piel se vuelve escamas. Sus ojos, fuego."
+    "Sus alas se despliegan. Ya no es un hombre. Es un demonio."
+    "La Fase 2 ha comenzado."
+    show kazuki at left
+    show lyra at right
+    show gromm at center
+    lyra   "¡Kazuki! ¡Tenemos que ir al Abismo!"
+    kazuki "¡Vamos! ¡Esto no termina aca!"
+    gromm  "¡Que alguien me explique que acaba de pasar!"
+    kazuki "¡Despues, Gromm! ¡Corran!"
     hide kazuki
     hide lyra
     hide gromm
     return
 
 # ============================================================
-# NIVEL 6
+# NIVEL 6: EL ABISMO DE LOS CONDENADOS (Boss: Senor Oscuro Demonio)
 # ============================================================
 label dialogo_nivel6_inicio:
     scene black
     "El Abismo de los Condenados es una caverna al pie del volcan."
-    "Se dice que el Senor Oscuro usa este lugar para sus rituales."
+    "El Senor Oscuro ha huido aqui. En su forma demoniaca, es aun mas peligroso."
     show kazuki at left
     show lyra at right
     show gromm at center
@@ -270,7 +283,7 @@ label dialogo_nivel6_inicio:
     kazuki "Recuerden el plan. Gromm, aguanta los ataques. Lyra, dispara desde lejos."
     lyra   "¿Eso es tu plan? ¿'Ver que haces'?"
     kazuki "Soy estratega, no heroe. Los planes se hacen sobre la marcha."
-    gromm  "¡Me parece bien, golpeare tanto a ese señor oscuro que no quedara nada de el!"
+    gromm  "¡Me parece bien, golpeare tanto a ese demonio que no quedara nada de el!"
     lyra   "Ustedes dos me van a volver loca."
     kazuki "Entonces al menos moriremos con estilo."
     lyra   "..."
@@ -287,22 +300,22 @@ label dialogo_nivel6_victoria:
     show kazuki at left
     show lyra at right
     show gromm at center
-    "El Senor Oscuro cae de rodillas. Pero no esta muerto."
-    "Se levanta. Su cuerpo se retuerce."
     show senor_oscuro at center
+    "El Señor Oscuro (demonio) cae. Sus alas se quiebran. Pero no esta muerto."
     senor_oscuro "¿Crees que puedes matarme? ¡Soy eterno!"
     kazuki "Nadie es eterno. Ni tu."
     senor_oscuro "Calla, humano insolente! Has arruinado mis planes pero aun tengo mas sorpresas!"
     gromm "Ah si? Pues demuestra todo lo que tienes, estupido fanfarron!"
-    senor_oscuro "¡Entonces mira mi verdadero poder, humano insolente!"
+    senor_oscuro "¡Entonces mira mi VERDADERA forma, humano insolente!"
     hide senor_oscuro
-    "El Senor Oscuro se transforma. Su piel se vuelve escamas. Sus ojos, fuego."
-    "La Fase 2 ha comenzado."
+    "El Demonio se retuerce. Sus alas se desgarran. Su carne se deshace."
+    "De su cuerpo emergen tentaculos. Su forma ya no es humanoide."
+    "La Fase 3 ha comenzado. EL SEÑOR OSCURO REVELA SU FORMA FINAL."
     show kazuki at left
     show lyra at right
     show gromm at center
-    lyra   "¡Kazuki! ¡Tenemos que ir al Trono!"
-    kazuki "¡Vamos! ¡Esto no termina aca!"
+    lyra   "¡Kazuki! ¡Esto no es un demonio! ¡Es algo peor!"
+    kazuki "¡Vamos al Trono! ¡Es nuestra ultima oportunidad!"
     gromm  "¡Que alguien me explique que acaba de pasar!"
     kazuki "¡Despues, Gromm! ¡Corran!"
     hide kazuki
@@ -311,24 +324,24 @@ label dialogo_nivel6_victoria:
     return
 
 # ============================================================
-# NIVEL 7
+# NIVEL 7: EL TRONO DEL SENOR OSCURO (Boss: Senor Oscuro Tentaculos)
 # ============================================================
 label dialogo_nivel7_inicio:
     scene black
     "La Sala del Trono. El corazon del Imperio Oscuro."
-    "El Senor Oscuro esta sentado en su trono, esperando."
+    "En el trono, algo que ya no puede llamarse humano espera."
     show senor_oscuro at center
-    senor_oscuro "Los esperaba. Tardaron mas de lo que pense."
+    senor_oscuro "Los esperaba... aunque ya no puedo verlos con ojos humanos..."
     show kazuki at left
     show lyra at right
     show gromm at center
-    kazuki "La paciencia no es tu fuerte, ¿verdad?"
-    senor_oscuro "La paciencia es para los debiles. Yo soy un dios."
-    gromm  "¡No eres un dios! ¡Eres un tirano! ¡Y los tiranos caen!"
-    senor_oscuro "Entonces vengan. Muestrenme su fuerza."
+    kazuki "¿Que te has hecho a ti mismo?"
+    senor_oscuro "Me he convertido... en lo que siempre fui... en la PODREDUMBRE misma."
+    gromm  "¡No eres un dios! ¡Eres un monstruo! ¡Y los monstruos caen!"
+    senor_oscuro "Entonces vengan. Muestrenme su fuerza... si es que aun tienen alguna."
     lyra   "Esto es tu final, tirano."
     gromm  "¡Por Veridia! ¡Por los caidos! ¡Y por mi familia!"
-    senor_oscuro "Patetico. Pero admiro su valentia. Los mataremos de forma lenta para disfrutar de sus gritos de agonia, malditos insectos!"
+    senor_oscuro "Patetico. Pero admiro su valentia. Los devorare... lentamente."
     kazuki "Eso lo veremos."
     hide kazuki
     hide lyra
@@ -341,7 +354,13 @@ label dialogo_nivel7_victoria:
     show kazuki at left
     show lyra at right
     show gromm at center
-    "El Senor Oscuro cae. Su trono se desmorona. El Imperio, tambien."
+    "El Monstruo de Tentaculos se desmorona. Su cuerpo vuelve a su forma humana."
+    "El Senor Oscuro, ahora un anciano debil, yace en el suelo."
+    senor_oscuro "Lo lograron... al fin... alguien pudo detenerme..."
+    kazuki "¿Por que? ¿Por que hiciste todo esto?"
+    senor_oscuro "Porque... tenia miedo. Miedo de morir. Miedo de perder... todo."
+    senor_oscuro "El poder... me consumio. Pero ustedes... ustedes no se rindieron."
+    "El Senor Oscuro exhala su ultimo aliento. El Imperio Oscuro ha caido."
     "Pero no hay tiempo para celebrar. Veridia esta en ruinas."
     kazuki "Lo logramos. Pero... ¿a que costo?"
     lyra   "Veridia sobrevivira. Los reinos siempre lo hacen."
@@ -354,6 +373,6 @@ label dialogo_nivel7_victoria:
     lyra   "¿Te vas a quedar, Kazuki? ¿O vas a volver a tu mundo?"
     kazuki "..."
     kazuki "Me quedare."
-    "Kazuki y Lyra se toman de las manos oficializando su relacion amorosa. Gromm mira al paisaje dejando a los dos tortolos."
+    "Kazuki y Lyra se toman de las manos. Gromm mira al paisaje."
     "FIN"
     return
