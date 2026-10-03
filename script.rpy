@@ -20,6 +20,7 @@ default partida_terminada = False
 default resultado_batalla = ""
 default nivel_actual = 0
 default partida_guardada = False
+default seleccion_heroe=True
 default slot_guardado = "partida"
 default boss_musica_activada = False
 
@@ -1264,36 +1265,45 @@ screen tablero_versus():
 # ============================================================
 # SCREEN: SELECCION DE HEROES
 # ============================================================
+
 screen seleccion_heroes():
-    modal True
     add "seleccion_heroe.png"
+    modal True
+    viewport:
+        null
 
-    frame:
-        background "#00000088"
-        xfill True
-        yfill True
-
+    if seleccion_heroe:
         vbox:
-            xalign 0.5
-            yalign 0.5
-            spacing 30
+          
+            imagebutton:
+                id "Kazuki"  
+                idle "kasuki_idle.png"    
+                hover "kasuki_hover.png"  
+                focus_mask True
+                action [SetVariable("heroe_actual", heroes[0]), Return()]  
 
-            text "Elegi a tu heroe:" size 40 color "#ffffff" bold True
 
-            textbutton "Kazuki (Estratega)":
-                action [SetVariable("heroe_actual", heroes[0]), Return()]
-                text_size 30
-                xalign 0.5
-
-            textbutton "Lyra (Arquera Elfa)":
+    if seleccion_heroe:
+        vbox:
+            
+            imagebutton:
+                id "Lyra"  
+                idle "elfa_idle.png"    
+                hover "elfa_hover.png"  
+                focus_mask True
                 action [SetVariable("heroe_actual", heroes[1]), Return()]
-                text_size 30
-                xalign 0.5
 
-            textbutton "Gromm (Caballero Enano)":
+
+    if seleccion_heroe:
+        vbox:
+           
+            imagebutton:
+                id "Gromm"  
+                idle "enano_idle.png"    
+                hover "enano_hover.png"  
+                focus_mask True
                 action [SetVariable("heroe_actual", heroes[2]), Return()]
-                text_size 30
-                xalign 0.5
+
 
 # ============================================================
 # SPLASHSCREEN
