@@ -40,6 +40,11 @@ screen main_menu():
                     action ShowMenu("load")
                     xalign 0.5
                     text_size 30
+                    
+                textbutton "Ver Logros":
+                    action ShowMenu("pantalla_logros")
+                    xalign 0.5
+                    text_size 30
 
                 textbutton "Salir":
                     action Quit(confirm=False)
