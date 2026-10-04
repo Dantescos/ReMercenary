@@ -1210,9 +1210,9 @@ label versus_inicio_batalla:
     $ unidad_seleccionada = None
     $ partida_terminada = False
     $ resultado_batalla = ""
-    $ tablero_actual = "nivel5.png"   
+    $ _actual = "nivel5.png"   
     "Empieza la batalla!"
-    call screen tablero_versus
+    call screen _versus
 
     if resultado_batalla == "j1_gana":
         jump versus_j1_gana
@@ -1234,11 +1234,11 @@ label versus_j2_gana:
 # ============================================================
 label comenzar_batalla:
     "Tu ejercito esta listo!"
-    "Mision: Elimina a todos los enemigos del tablero!"
+    "Mision: Elimina a todos los enemigos del !"
     $ partida_terminada = False
     $ resultado_batalla = ""
     $ boss_spawneado = False
-    call screen tablero
+    call screen 
 
     if resultado_batalla == "victoria":
         jump victoria_jugador
@@ -1388,7 +1388,7 @@ screen tablero():
 
         timer 0.5 repeat True action If(partida_terminada, Return("fin"), NullAction())
 
-    key "K_ESCAPE" action [Hide("tablero"), Jump("menu_principal")]
+
 
 # ============================================================
 # SCREEN: TABLERO VERSUS
@@ -1439,7 +1439,7 @@ screen tablero_versus():
 
         timer 0.5 repeat True action If(partida_terminada, Return("fin"), NullAction())
 
-    key "K_ESCAPE" action [Hide("tablero_versus"), Jump("menu_principal")]
+ 
 
 # ============================================================
 # SCREEN: SELECCION DE HEROES
