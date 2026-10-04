@@ -143,6 +143,7 @@ label nivel1:
     $ reproducir_musica("Lvl1.wav", fadein=1.0, loop=True)
     $ boss_musica_activada = False
     $ boss_spawneado = False
+    $ tablero_actual = "nivel1.png"   
     call dialogo_nivel1_inicio
     $ enemigos = crear_enemigos_nivel1()
     $ nivel_actual = 1
@@ -153,6 +154,7 @@ label nivel2:
     $ reproducir_musica("Lvl2.wav", fadein=1.0, loop=True)
     $ boss_musica_activada = False
     $ boss_spawneado = False
+    $ tablero_actual = "nivel2.png"    
     call dialogo_nivel2_inicio
     $ enemigos = crear_enemigos_nivel2()
     $ nivel_actual = 2
@@ -163,6 +165,7 @@ label nivel3:
     $ reproducir_musica("Lvl3.wav", fadein=1.0, loop=True)
     $ boss_musica_activada = False
     $ boss_spawneado = False
+    $ tablero_actual = "nivel3.png"    
     call dialogo_nivel3_inicio
     $ enemigos = crear_enemigos_nivel3()
     $ nivel_actual = 3
@@ -173,6 +176,7 @@ label nivel4:
     $ reproducir_musica("Lvl4.wav", fadein=1.0, loop=True)
     $ boss_musica_activada = False
     $ boss_spawneado = False
+    $ tablero_actual = "nivel4.png"
     call dialogo_nivel4_inicio
     $ enemigos = crear_enemigos_nivel4()
     $ nivel_actual = 4
@@ -183,6 +187,7 @@ label nivel5:
     $ reproducir_musica("Lvl5.wav", fadein=1.0, loop=True)
     $ boss_musica_activada = False
     $ boss_spawneado = False
+    $ tablero_actual = "nivel5.png"
     call dialogo_nivel5_inicio
     $ enemigos = crear_enemigos_nivel5()
     $ nivel_actual = 5
@@ -193,6 +198,7 @@ label nivel6:
     $ reproducir_musica("Lvl6.wav", fadein=1.0, loop=True)
     $ boss_musica_activada = False
     $ boss_spawneado = False
+    $ tablero_actual = "nivel6.png"  
     call dialogo_nivel6_inicio
     $ enemigos = crear_enemigos_nivel6()
     $ nivel_actual = 6
@@ -203,6 +209,8 @@ label nivel7:
     $ reproducir_musica("Lvl7.wav", fadein=1.0, loop=True)
     $ boss_musica_activada = False
     $ boss_spawneado = False
+    $ tablero_actual = "nivel7.png"
+
     call dialogo_nivel7_inicio
     $ enemigos = crear_enemigos_nivel7()
     $ nivel_actual = 7

@@ -28,7 +28,6 @@ init python:
             self._flecha_trucada = 0
             self._energia = 0
 
-        # GETTERS
         def get_clase(self): return self._clase
         def get_vida(self): return self._vida
         def get_vida_max(self): return self._vida_max
@@ -47,7 +46,6 @@ init python:
         def get_flecha_trucada(self): return self._flecha_trucada
         def get_energia(self): return self._energia
 
-        # SETTERS
         def set_clase(self, v): self._clase = v
         def set_vida(self, v): self._vida = max(0, v)
         def set_vida_max(self, v): self._vida_max = v
@@ -121,7 +119,6 @@ init python:
     class Mago(FichaBase):
         def __init__(self, clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible, magia, magia_max=0, cantidad_fuego=10, cantidad_carambano=10, cantidad_castigo=10):
             super(Mago, self).__init__(clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible)
-            # FIX: si magia_max < magia, usar magia como máximo
             self.set_magia_max(max(magia, magia_max))
             self.set_magia(magia)
             self.__cantidad_fuego = cantidad_fuego
@@ -346,7 +343,6 @@ init python:
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_especial() * 5.0))
             return 0
 
-        # FIX: agregar flecha_sombria que la IA llamaba pero no existía
         def flecha_sombria(self, objetivo):
             return self.flecha_venenosa(objetivo)
 
@@ -583,11 +579,12 @@ init python:
             return self.get_magia()
 
     # ========================================================
-    # HEROES JUGABLES
+    # HEROES JUGABLES - STATS BALANCEADOS
     # ========================================================
     class Kazuki(Mago):
         def __init__(self, x, y):
-            super(Kazuki, self).__init__("Kazuki", 180, 25, 20, 4, 3, 35, x, y, 0, True, 100, 250, 10, 10, 10)
+            # HP 1500 | ATK 250 | DEF 100 | daño esp 250 | magia 500/5000
+            super(Kazuki, self).__init__("Kazuki", 1500, 250, 100, 4, 3, 250, x, y, 0, True, 500, 5000, 20, 20, 20)
 
         def potenciar_aliado(self, aliado=None):
             if aliado is None:
@@ -598,7 +595,8 @@ init python:
 
     class Lyra(Arquero):
         def __init__(self, x, y):
-            super(Lyra, self).__init__("Lyra", 140, 28, 15, 5, 4, 35, x, y, 0, True, 30, 10)
+            # HP 1200 | ATK 250 | DEF 90 | daño esp 250 | carcaj 80 | esp 40
+            super(Lyra, self).__init__("Lyra", 1200, 250, 90, 5, 4, 250, x, y, 0, True, 80, 40)
 
         def flecha_perforante(self, objetivo):
             danio_base = self.get_ataque_basico() + 10
@@ -609,7 +607,8 @@ init python:
 
     class Gromm(Guerrero):
         def __init__(self, x, y):
-            super(Gromm, self).__init__("Gromm", 220, 30, 40, 3, 1, 40, x, y, 0, True)
+            # HP 3000 | ATK 200 | DEF 220 | daño esp 200 (tanque)
+            super(Gromm, self).__init__("Gromm", 3000, 200, 220, 3, 1, 200, x, y, 0, True)
 
         def escudo_levantado(self):
             self.set_defensa(self.get_defensa() * 2)

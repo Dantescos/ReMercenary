@@ -79,7 +79,7 @@ init python:
         return danio
 
 # ============================================================
-# MOVIMIENTO DE ENEMIGOS - PARA QUE LA IA SE MUEVA
+# MOVIMIENTO DE ENEMIGOS
 # ============================================================
 init python:
     def mover_enemigos():
@@ -392,9 +392,7 @@ label combate(heroe, enemigo):
         $ clase = heroe.get_clase()
         $ accion_realizada = False
 
-        # ============================================
         # KAZUKI
-        # ============================================
         if clase == "Kazuki":
             $ info_k = "Kazuki - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
             menu:
@@ -441,7 +439,7 @@ label combate(heroe, enemigo):
                     else:
                         $ accion_realizada = True
                         "WALDGOSE! [danio] de danio."
-                "Potenciar aliado (+20% ATQ)":
+                "Potenciar aliado (+20%% ATQ)":
                     $ heroe.potenciar_aliado(heroe)
                     $ accion_realizada = True
                     "Kazuki se potencia! ATQ: [heroe.get_ataque_basico()]"
@@ -460,9 +458,7 @@ label combate(heroe, enemigo):
                     "Escapaste!"
                     return
 
-        # ============================================
         # LYRA
-        # ============================================
         elif clase == "Lyra":
             $ info_l = "Lyra - FLECHAS: " + str(heroe.get_carcaj()) + " | ESP: " + str(heroe.get_flecha_trucada())
             menu:
@@ -524,9 +520,7 @@ label combate(heroe, enemigo):
                     "Escapaste!"
                     return
 
-        # ============================================
         # GROMM
-        # ============================================
         elif clase == "Gromm":
             $ info_g = "Gromm - ATQ: " + str(heroe.get_ataque_basico()) + " | DEF: " + str(heroe.get_defensa())
             menu:
@@ -547,9 +541,7 @@ label combate(heroe, enemigo):
                     "Escapaste!"
                     return
 
-        # ============================================
         # MAGO
-        # ============================================
         elif clase in ["Mago", "Mago2"]:
             $ info_m = "Mago - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
             menu:
@@ -611,9 +603,7 @@ label combate(heroe, enemigo):
                     "Escapaste!"
                     return
 
-        # ============================================
         # ARCHIMAGO
-        # ============================================
         elif clase in ["Archimago", "Archimago2"]:
             $ info_a = "Archimago - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
             menu:
@@ -682,9 +672,7 @@ label combate(heroe, enemigo):
                     "Escapaste!"
                     return
 
-        # ============================================
         # GUERRERO
-        # ============================================
         elif clase in ["Guerrero", "Guerrero2"]:
             $ info_gu = "Guerrero - ATQ: " + str(heroe.get_ataque_basico()) + " | DEF: " + str(heroe.get_defensa())
             menu:
@@ -705,9 +693,7 @@ label combate(heroe, enemigo):
                     "Escapaste!"
                     return
 
-        # ============================================
         # ARQUERO
-        # ============================================
         elif clase in ["Arquero", "Arquero2"]:
             $ info_ar = "Arquero - FLECHAS: " + str(heroe.get_carcaj()) + " | ESP: " + str(heroe.get_flecha_trucada())
             menu:
@@ -755,9 +741,7 @@ label combate(heroe, enemigo):
                     "Escapaste!"
                     return
 
-        # ============================================
         # LICH
-        # ============================================
         elif clase in ["Lich", "Lich2"]:
             $ info_li = "Lich - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
             menu:
@@ -805,9 +789,7 @@ label combate(heroe, enemigo):
                     "Escapaste!"
                     return
 
-        # ============================================
         # CLERIGO
-        # ============================================
         elif clase in ["Clerigo", "Clerigo2"]:
             $ info_cl = "Clerigo - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
             menu:
@@ -855,9 +837,7 @@ label combate(heroe, enemigo):
                     "Escapaste!"
                     return
 
-        # ============================================
         # GENERAL
-        # ============================================
         elif clase in ["General", "General2"]:
             $ info_gen = "General - ENERGIA: " + str(heroe.get_energia())
             menu:
@@ -898,9 +878,7 @@ label combate(heroe, enemigo):
                     "Escapaste!"
                     return
 
-        # ============================================
         # DRAGON
-        # ============================================
         elif clase in ["Dragon", "Dragon2"]:
             $ info_dr = "Dragon - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
             menu:
@@ -963,7 +941,6 @@ label combate(heroe, enemigo):
                     "Escapaste!"
                     return
 
-        # MOSTRAR STATS ACTUALIZADOS DESPUES DE LA ACCION
         if accion_realizada:
             $ stats_post = get_stats_personaje(heroe)
             "[nombre_heroe] ahora tiene: [stats_post]"
@@ -1049,42 +1026,42 @@ label armar_ejercito:
         menu:
             "Elegi una unidad para tu ejercito ([total]/[maxima_cantidad_unidades]):"
             "Mago":
-                $ unidad = Mago("Mago", 200, 25, 15, 4, 3, 30, px, py, 0, True, 100, 100, 10, 10, 10)
+                $ unidad = Mago("Mago", 1200, 200, 100, 4, 3, 200, px, py, 0, True, 1500, 1500, 15, 15, 15)
                 $ ejercito.append(unidad)
                 "Agregaste un Mago."
                 jump armar_ejercito
             "General":
-                $ unidad = General("General", 250, 30, 20, 3, 2, 40, px, py, 0, True, 1000, 500)
+                $ unidad = General("General", 1500, 180, 120, 3, 2, 200, px, py, 0, True, 3000, 1000)
                 $ ejercito.append(unidad)
                 "Agregaste un General."
                 jump armar_ejercito
             "Archimago":
-                $ unidad = ArchiMago("Archimago", 300, 35, 25, 3, 3, 50, px, py, 0, True, 1500, 100)
+                $ unidad = ArchiMago("Archimago", 1500, 230, 130, 3, 3, 250, px, py, 0, True, 4000, 300)
                 $ ejercito.append(unidad)
                 "Agregaste un Archimago."
                 jump armar_ejercito
             "Guerrero":
-                $ unidad = Guerrero("Guerrero", 150, 40, 20, 4, 1, 35, px, py, 0, True)
+                $ unidad = Guerrero("Guerrero", 1400, 230, 130, 4, 1, 200, px, py, 0, True)
                 $ ejercito.append(unidad)
                 "Agregaste un Guerrero."
                 jump armar_ejercito
             "Dragon":
-                $ unidad = Dragon("Dragon", 300, 60, 30, 2, 3, 70, px, py, 0, True, 500, 0, 0)
+                $ unidad = Dragon("Dragon", 1800, 280, 130, 2, 3, 280, px, py, 0, True, 2500, 0, 0)
                 $ ejercito.append(unidad)
                 "Agregaste un Dragon."
                 jump armar_ejercito
             "Arquero":
-                $ unidad = Arquero("Arquero", 120, 25, 12, 4, 4, 30, px, py, 0, True, 30, 10)
+                $ unidad = Arquero("Arquero", 1000, 200, 90, 4, 4, 230, px, py, 0, True, 80, 30)
                 $ ejercito.append(unidad)
                 "Agregaste un Arquero."
                 jump armar_ejercito
             "Clerigo":
-                $ unidad = Clerigo("Clerigo", 150, 15, 18, 3, 2, 20, px, py, 0, True, 100)
+                $ unidad = Clerigo("Clerigo", 1200, 150, 110, 3, 2, 150, px, py, 0, True, 2000)
                 $ ejercito.append(unidad)
                 "Agregaste un Clerigo."
                 jump armar_ejercito
             "Lich":
-                $ unidad = Lich("Lich", 180, 28, 20, 3, 2, 45, px, py, 0, True, 200)
+                $ unidad = Lich("Lich", 1200, 220, 110, 3, 2, 230, px, py, 0, True, 2000)
                 $ ejercito.append(unidad)
                 "Agregaste un Lich."
                 jump armar_ejercito
@@ -1136,16 +1113,16 @@ label armar_ejercito_j1:
         menu:
             "JUGADOR 1 - Elegi una unidad ([total]/[maxima_cantidad_unidades]):"
             "Mago":
-                $ ejercito_j1.append(Mago("J1_Mago", 200, 25, 15, 4, 3, 30, px, py, 0, True, 100, 100, 10, 10, 10))
+                $ ejercito_j1.append(Mago("J1_Mago", 1200, 200, 100, 4, 3, 200, px, py, 0, True, 1500, 1500, 15, 15, 15))
                 jump armar_ejercito_j1
             "Guerrero":
-                $ ejercito_j1.append(Guerrero("J1_Guerrero", 150, 40, 20, 4, 1, 35, px, py, 0, True))
+                $ ejercito_j1.append(Guerrero("J1_Guerrero", 1400, 230, 130, 4, 1, 200, px, py, 0, True))
                 jump armar_ejercito_j1
             "Arquero":
-                $ ejercito_j1.append(Arquero("J1_Arquero", 120, 25, 12, 4, 4, 30, px, py, 0, True, 30, 10))
+                $ ejercito_j1.append(Arquero("J1_Arquero", 1000, 200, 90, 4, 4, 230, px, py, 0, True, 80, 30))
                 jump armar_ejercito_j1
             "Dragon":
-                $ ejercito_j1.append(Dragon("J1_Dragon", 300, 60, 30, 2, 3, 70, px, py, 0, True, 500, 0, 0))
+                $ ejercito_j1.append(Dragon("J1_Dragon", 1800, 280, 130, 2, 3, 280, px, py, 0, True, 2500, 0, 0))
                 jump armar_ejercito_j1
             "Terminar":
                 if total == 0:
@@ -1175,16 +1152,16 @@ label armar_ejercito_j2:
         menu:
             "JUGADOR 2 - Elegi una unidad ([total]/[maxima_cantidad_unidades]):"
             "Mago":
-                $ ejercito_j2.append(Mago("J2_Mago", 200, 25, 15, 4, 3, 30, px, py, 0, True, 100, 100, 10, 10, 10))
+                $ ejercito_j2.append(Mago("J2_Mago", 1200, 200, 100, 4, 3, 200, px, py, 0, True, 1500, 1500, 15, 15, 15))
                 jump armar_ejercito_j2
             "Guerrero":
-                $ ejercito_j2.append(Guerrero("J2_Guerrero", 150, 40, 20, 4, 1, 35, px, py, 0, True))
+                $ ejercito_j2.append(Guerrero("J2_Guerrero", 1400, 230, 130, 4, 1, 200, px, py, 0, True))
                 jump armar_ejercito_j2
             "Arquero":
-                $ ejercito_j2.append(Arquero("J2_Arquero", 120, 25, 12, 4, 4, 30, px, py, 0, True, 30, 10))
+                $ ejercito_j2.append(Arquero("J2_Arquero", 1000, 200, 90, 4, 4, 230, px, py, 0, True, 80, 30))
                 jump armar_ejercito_j2
             "Dragon":
-                $ ejercito_j2.append(Dragon("J2_Dragon", 300, 60, 30, 2, 3, 70, px, py, 0, True, 500, 0, 0))
+                $ ejercito_j2.append(Dragon("J2_Dragon", 1800, 280, 130, 2, 3, 280, px, py, 0, True, 2500, 0, 0))
                 jump armar_ejercito_j2
             "Terminar":
                 if total == 0:
@@ -1210,9 +1187,9 @@ label versus_inicio_batalla:
     $ unidad_seleccionada = None
     $ partida_terminada = False
     $ resultado_batalla = ""
-    $ _actual = "nivel5.png"   
+    $ _actual = "nivel5.png"
     "Empieza la batalla!"
-    call screen _versus
+    call screen tablero_versus
 
     if resultado_batalla == "j1_gana":
         jump versus_j1_gana
@@ -1238,7 +1215,7 @@ label comenzar_batalla:
     $ partida_terminada = False
     $ resultado_batalla = ""
     $ boss_spawneado = False
-    call screen 
+    call screen tablero
 
     if resultado_batalla == "victoria":
         jump victoria_jugador
@@ -1324,7 +1301,7 @@ label reiniciar_partida:
 screen tablero():
     modal True
     fixed:
-        add tablero_actual:      # ← USA LA VARIABLE
+        add tablero_actual:
             xsize 1920
             ysize 1080
 
@@ -1389,14 +1366,13 @@ screen tablero():
         timer 0.5 repeat True action If(partida_terminada, Return("fin"), NullAction())
 
 
-
 # ============================================================
 # SCREEN: TABLERO VERSUS
 # ============================================================
 screen tablero_versus():
     modal True
     fixed:
-        add tablero_actual:     
+        add tablero_actual:
             xsize 1920
             ysize 1080
 
@@ -1439,7 +1415,6 @@ screen tablero_versus():
 
         timer 0.5 repeat True action If(partida_terminada, Return("fin"), NullAction())
 
- 
 
 # ============================================================
 # SCREEN: SELECCION DE HEROES
