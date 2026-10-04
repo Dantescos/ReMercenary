@@ -1,6 +1,5 @@
 init python:
     config.game_menu_action = ShowMenu("pause_menu")
-    
 
 
 screen main_menu():
@@ -44,6 +43,11 @@ screen main_menu():
 
                 textbutton "Ver Logros":
                     action ShowMenu("pantalla_logros")
+                    xalign 0.5
+                    text_size 30
+
+                textbutton "Creditos":
+                    action ShowMenu("creditos_animados")
                     xalign 0.5
                     text_size 30
 
@@ -107,6 +111,7 @@ screen game_menu(title=None, scroll=None, yinitial=0.0):
             hover "salir_hover.png"
             focus_mask True
             action Quit(confirm=True)
+
 
 screen choice(items):
     style_prefix "choice"
@@ -197,3 +202,119 @@ screen pause_menu():
             hover "salir_hover.png"
             focus_mask True
             action Quit(confirm=True)
+
+
+# ============================================================
+# SCREEN: CREDITOS ANIMADOS
+# ============================================================
+screen creditos_animados():
+    tag menu
+    modal True
+
+    frame:
+        xfill True
+        yfill True
+        background "#000000"
+
+    vbox:
+        xalign 0.5
+        spacing 20
+        at creditos_scroll
+
+        text "RE: MERCENARY":
+            xalign 0.5
+            size 70
+            color "#ffcc00"
+            bold True
+
+        null height 100
+
+        text "EQUIPO DE DESARROLLO":
+            xalign 0.5
+            size 35
+            color "#ffffff"
+
+        null height 30
+
+        text "Nahuel Zanini":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+
+        text "Antonio Garcia":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+
+        null height 60
+
+        text "PROGRAMACION":
+            xalign 0.5
+            size 35
+            color "#ffffff"
+
+        null height 30
+
+        text "Nahuel Zanini":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+
+        text "Antonio Garcia":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+
+        null height 60
+
+        text "ARTE Y DISEÑO":
+            xalign 0.5
+            size 35
+            color "#ffffff"
+
+        null height 30
+
+        text "(nombres)":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+
+        null height 60
+
+        text "AGRADECIMIENTOS":
+            xalign 0.5
+            size 35
+            color "#ffffff"
+
+        null height 30
+
+        text "A nuestras familias y amigos":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+
+        null height 200
+
+        text "© 2026 Equipo RE: MERCENARY":
+            xalign 0.5
+            size 20
+            color "#888888"
+
+        null height 500
+
+    # Botón para volver
+    textbutton "Volver al menú":
+        xalign 0.98
+        yalign 0.98
+        text_size 24
+        text_color "#888888"
+        text_hover_color "#ffffff"
+        action Return()
+
+    # Sale automáticamente al terminar el scroll
+    timer 28.0 action Return()
+
+
+transform creditos_scroll:
+    ypos 1.0
+    linear 25.0 ypos -1.5

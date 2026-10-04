@@ -1245,6 +1245,7 @@ label victoria_jugador:
     elif nivel_actual == 7:
         call dialogo_nivel7_victoria
         "HAS COMPLETADO EL JUEGO!"
+        call screen creditos_animados
         jump menu_principal
     else:
         "Nivel completado!"
