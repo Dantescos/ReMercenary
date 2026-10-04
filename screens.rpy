@@ -5,6 +5,8 @@ init python:
 screen main_menu():
     tag menu
 
+    on "show" action Play("music", "audio/inicio.wav", fadein=1.0, loop=True)
+
     frame:
         xfill True
         yfill True
@@ -46,8 +48,13 @@ screen main_menu():
                     xalign 0.5
                     text_size 30
 
-                textbutton "Creditos":
-                    action ShowMenu("creditos_animados")
+                textbutton "Lore":
+                    action [Play("music", "audio/lore.wav", fadein=1.0, loop=True), ShowMenu("pantalla_lore")]
+                    xalign 0.5
+                    text_size 30
+
+                textbutton "Créditos":
+                    action [Play("music", "audio/creditos.wav", fadein=1.0, loop=True), ShowMenu("creditos_animados")]
                     xalign 0.5
                     text_size 30
 
@@ -211,6 +218,8 @@ screen creditos_animados():
     tag menu
     modal True
 
+    on "show" action Play("music", "audio/creditos.wav", fadein=1.0, loop=True)
+
     frame:
         xfill True
         yfill True
@@ -302,7 +311,6 @@ screen creditos_animados():
 
         null height 500
 
-    # Botón para volver
     textbutton "Volver al menú":
         xalign 0.98
         yalign 0.98
@@ -311,7 +319,6 @@ screen creditos_animados():
         text_hover_color "#ffffff"
         action Return()
 
-    # Sale automáticamente al terminar el scroll
     timer 28.0 action Return()
 
 
