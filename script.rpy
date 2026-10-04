@@ -26,9 +26,11 @@ default modo_versus = False
 default ejercito_j1 = []
 default ejercito_j2 = []
 default turno_actual = 1
+default tablero_actual = "tablero.png"
 
 image pantalla_inicio = "pantalla_inicio.png"
 image portada = "portada.png"
+
 
 init python:
     import random
@@ -1208,6 +1210,7 @@ label versus_inicio_batalla:
     $ unidad_seleccionada = None
     $ partida_terminada = False
     $ resultado_batalla = ""
+    $ tablero_actual = "nivel5.png"   
     "Empieza la batalla!"
     call screen tablero_versus
 
@@ -1321,7 +1324,7 @@ label reiniciar_partida:
 screen tablero():
     modal True
     fixed:
-        add "tablero.png":
+        add tablero_actual:      # ← USA LA VARIABLE
             xsize 1920
             ysize 1080
 
@@ -1393,7 +1396,7 @@ screen tablero():
 screen tablero_versus():
     modal True
     fixed:
-        add "tablero.png":
+        add tablero_actual:     
             xsize 1920
             ysize 1080
 
