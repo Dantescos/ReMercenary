@@ -1426,7 +1426,9 @@ label versus_inicio_batalla:
     $ unidad_seleccionada = None
     $ partida_terminada = False
     $ resultado_batalla = ""
-    $ _actual = "nivel5.png"
+    $ tablero_actual = "nivel5.png"
+    $ reproducir_musica("versus.wav", fadein=1.0, loop=True)
+
     "Empieza la batalla!"
     call screen tablero_versus
 
@@ -1438,10 +1440,12 @@ label versus_inicio_batalla:
         $ renpy.full_restart()
 
 label versus_j1_gana:
+    $ detener_musica(fadeout=1.0)
     "JUGADOR 1 GANA!"
     $ renpy.full_restart()
 
 label versus_j2_gana:
+    $ detener_musica(fadeout=1.0)
     "JUGADOR 2 GANA!"
     $ renpy.full_restart()
 
@@ -1450,7 +1454,7 @@ label versus_j2_gana:
 # ============================================================
 label comenzar_batalla:
     "Tu ejercito esta listo!"
-    "Mision: Elimina a todos los enemigos del !"
+    "Mision: Elimina a todos los enemigos del tablero"
     $ partida_terminada = False
     $ resultado_batalla = ""
     $ boss_spawneado = False
