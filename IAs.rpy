@@ -243,3 +243,131 @@ init python:
             except Exception as e:
                 print("[IA_Mago ERROR] " + str(e))
                 return 0
+
+    # ========================================================
+    # IA_SACERDOTISA
+    # ========================================================
+    class IA_Sacerdotisa:
+        def __init__(self):
+            pass
+
+        def evaluar(self, objeto, enemigo, aliados=None):
+            try:
+                if aliados is None:
+                    aliados = []
+                mas_herido = None
+                menor_vida = 999999
+                for a in aliados:
+                    if a != objeto and a.get_visible() and a.esta_vivo():
+                        if a.get_vida() < a.get_vida_max() * 0.5 and a.get_vida() < menor_vida:
+                            menor_vida = a.get_vida()
+                            mas_herido = a
+
+                # Revivir si alguien murio y hay magia
+                if objeto.get_magia() >= 1000:
+                    for a in aliados:
+                        if a != objeto and not a.esta_vivo():
+                            return objeto.resurreccion(a)
+
+                # Curar al mas herido
+                if mas_herido is not None and objeto.get_magia() >= 350:
+                    return objeto.bendicion_divina(aliados)
+
+                # Escudo a si misma o aliado
+                if objeto.get_magia() >= 250 and random.random() < 0.4:
+                    objetivo = mas_herido if mas_herido is not None else objeto
+                    return objeto.escudo_sagrado(objetivo)
+
+                # Castigo celestial
+                if objeto.get_magia() >= 500 and random.random() < 0.5:
+                    return objeto.castigo_celestial(enemigo)
+
+                # Palabras de fe
+                if objeto.get_magia() >= 100:
+                    return objeto.palabras_de_fe(enemigo)
+
+                # Ataque basico
+                return objeto.ataque_basico(enemigo)
+            except Exception as e:
+                print("[IA_Sacerdotisa ERROR] " + str(e))
+                return 0
+
+    # ========================================================
+    # IA_DEMONIA
+    # ========================================================
+    class IA_Demonia:
+        def __init__(self):
+            pass
+
+        def evaluar(self, objeto, enemigo):
+            try:
+                magia = objeto.get_magia()
+                vida = objeto.get_vida()
+
+                # Si esta muy herida, drenar vida
+                if vida < objeto.get_vida_max() * 0.4 and magia >= 150:
+                    return objeto.beso_drenante(enemigo)
+
+                # Buff de ataque si tiene magia
+                if magia >= 300 and random.random() < 0.2:
+                    return objeto.alas_de_fuego()
+
+                # Ataque devastador
+                if magia >= 200 and random.random() < 0.5:
+                    return objeto.latigazo_infernal(enemigo)
+
+                # Explosion si tiene vida suficiente
+                if vida > 800 and random.random() < 0.3:
+                    return objeto.explosion_infernal(enemigo)
+
+                # Ataque basico o llamarada
+                if magia >= 200:
+                    return objeto.ataque_llamarada_infernal(enemigo)
+                return objeto.ataque_basico(enemigo)
+            except Exception as e:
+                print("[IA_Demonia ERROR] " + str(e))
+                return 0
+
+    # ========================================================
+    # IA_LICHA
+    # ========================================================
+    class IA_Licha:
+        def __init__(self):
+            pass
+
+        def evaluar(self, objeto, enemigo):
+            try:
+                magia = objeto.get_magia()
+                vida = objeto.get_vida()
+
+                # Invocar esqueletos si puede
+                if objeto.get_invocaciones() > 0 and magia >= 250 and random.random() < 0.3:
+                    return objeto.invocar_esqueleto()
+
+                # Maldicion para debilitar
+                if magia >= 300 and random.random() < 0.2:
+                    return objeto.maldicion(enemigo)
+
+                # Miasma necrotico (daño fuerte)
+                if magia >= 400 and random.random() < 0.4:
+                    return objeto.miasma_necrotico(enemigo)
+
+                # Drenaje masivo si esta herida
+                if vida < objeto.get_vida_max() * 0.5 and magia >= 200:
+                    return objeto.drenaje_masivo(enemigo)
+
+                # Ejercito de muertos si tiene invocaciones
+                if objeto.get_invocaciones() > 0 and random.random() < 0.3:
+                    return objeto.ejercito_de_muertos(enemigo)
+
+                # Toque helado
+                if magia >= 100 and random.random() < 0.4:
+                    return objeto.toque_helado(enemigo)
+
+                # Regenerar magia o ataque basico
+                if magia < 50:
+                    return objeto.regenerar_magia()
+                return objeto.ataque_basico(enemigo)
+            except Exception as e:
+                print("[IA_Licha ERROR] " + str(e))
+                return 0

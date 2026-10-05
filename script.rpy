@@ -50,7 +50,13 @@ init python:
         hp_max = personaje.get_vida_max()
         texto = "HP: " + str(hp) + "/" + str(hp_max)
         try:
-            if isinstance(personaje, (store.Mago, store.ArchiMago, store.Lich, store.Clerigo, store.Dragon)):
+            if isinstance(personaje, store.Sacerdotisa):
+                texto += " | MAGIA: " + str(personaje.get_magia()) + "/" + str(personaje.get_magia_max())
+            elif isinstance(personaje, store.Demonia):
+                texto += " | MAGIA: " + str(personaje.get_magia()) + "/" + str(personaje.get_magia_max())
+            elif isinstance(personaje, store.Licha):
+                texto += " | MAGIA: " + str(personaje.get_magia()) + "/" + str(personaje.get_magia_max()) + " | INVOC: " + str(personaje.get_invocaciones())
+            elif isinstance(personaje, (store.Mago, store.ArchiMago, store.Lich, store.Clerigo, store.Dragon)):
                 texto += " | MAGIA: " + str(personaje.get_magia()) + "/" + str(personaje.get_magia_max())
             elif isinstance(personaje, store.Arquero):
                 texto += " | FLECHAS: " + str(personaje.get_carcaj()) + " | ESP: " + str(personaje.get_flecha_trucada())
@@ -371,7 +377,10 @@ label combate(heroe, enemigo):
     python:
         ia = None
         clase_enemigo = enemigo.get_clase()
-        if "Archimago" in clase_enemigo: ia = IA_ArchiMago()
+        if "Sacerdotisa" in clase_enemigo: ia = IA_Sacerdotisa()
+        elif "Demonia" in clase_enemigo: ia = IA_Demonia()
+        elif "Licha" in clase_enemigo: ia = IA_Licha()
+        elif "Archimago" in clase_enemigo: ia = IA_ArchiMago()
         elif "Lich" in clase_enemigo: ia = IA_Lich()
         elif "Clerigo" in clase_enemigo: ia = IA_Clerigo()
         elif "Guerrero" in clase_enemigo: ia = IA_Guerrero()
@@ -929,6 +938,203 @@ label combate(heroe, enemigo):
                 "Huir":
                     "Escapaste!"
                     return
+        # SACERDOTISA
+        elif clase == "Sacerdotisa":
+            $ info_sac = "Sacerdotisa - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
+            menu:
+                "[info_sac]"
+                "Ataque basico - 100 magia":
+                    $ danio = heroe.ataque_basico(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia! Recuperas 50."
+                    else:
+                        $ accion_realizada = True
+                        "Ataque! [danio] de danio."
+                "Bendicion Divina - 350 magia (cura a todos)":
+                    $ curados = heroe.bendicion_divina(store.heroes + store.ejercito)
+                    if curados == 0:
+                        "No tienes suficiente magia o nadie esta herido!"
+                    else:
+                        $ accion_realizada = True
+                        "Curaste a [curados] aliados +120 HP."
+                "Escudo Sagrado - 250 magia (+500 DEF)":
+                    $ resultado = heroe.escudo_sagrado(heroe)
+                    if resultado == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "DEF: [heroe.get_defensa()]"
+                "Castigo Celestial - 500 magia":
+                    $ danio = heroe.castigo_celestial(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "CASTIGO! [danio] de danio."
+                "Palabras de Fe - 100 magia (-40%% ATQ enemigo)":
+                    $ resultado = heroe.palabras_de_fe(enemigo)
+                    if resultado == False:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "ATQ enemigo reducido a [enemigo.get_ataque_basico()]"
+                "Luz Cegadora - 300 magia":
+                    $ danio = heroe.luz_cegadora_dia(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Luz! [danio] de danio."
+                "Exorcismo - 400 magia":
+                    $ danio = heroe.exorcismo(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "EXORCISMO! [danio] de danio."
+                "Recuperar Magia +200":
+                    $ heroe.recuperacion_sagrada(200)
+                    $ accion_realizada = True
+                    "MAGIA: [heroe.get_magia()]"
+                "Huir":
+                    "Escapaste!"
+                    return
+
+        # DEMONIA
+        elif clase == "Demonia":
+            $ info_dem = "Demonia - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
+            menu:
+                "[info_dem]"
+                "Ataque basico - 100 magia":
+                    $ danio = heroe.ataque_basico(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia! Recuperas 50."
+                    else:
+                        $ accion_realizada = True
+                        "Golpe! [danio] de danio."
+                "Latigazo Infernal - 200 magia (quema)":
+                    $ danio = heroe.latigazo_infernal(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "LATIGAZO! [danio] de danio (con quemadura)."
+                "Beso Drenante - 150 magia (roba vida)":
+                    $ danio = heroe.beso_drenante(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "DRENAJE! [danio] de danio. HP: [heroe.get_vida()]"
+                "Alas de Fuego - 300 magia (+30%% ATQ)":
+                    $ resultado = heroe.alas_de_fuego()
+                    if resultado == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "ATQ: [heroe.get_ataque_basico()] | MOV: [heroe.get_puntos_mov()]"
+                "Explosion Infernal - 400 HP (daño masivo)":
+                    $ danio = heroe.explosion_infernal(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente vida!"
+                    else:
+                        $ accion_realizada = True
+                        "EXPLOSION! [danio] de danio. HP: [heroe.get_vida()]"
+                "Llamarada Infernal - 200 magia":
+                    $ danio = heroe.ataque_llamarada_infernal(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Llamarada! [danio] de danio."
+                "Regeneracion":
+                    $ restaurado = heroe.regeneracion_dragon()
+                    $ accion_realizada = True
+                    "HP recuperado: [restaurado]"
+                "Recuperar Magia +100":
+                    $ heroe.recuperacion_draconica(100)
+                    $ accion_realizada = True
+                    "MAGIA: [heroe.get_magia()]"
+                "Huir":
+                    "Escapaste!"
+                    return
+
+        # LICHA
+        elif clase == "Licha":
+            $ info_lic = "Licha - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max()) + " | INVOC: " + str(heroe.get_invocaciones())
+            menu:
+                "[info_lic]"
+                "Ataque basico - 100 magia":
+                    $ danio = heroe.ataque_basico(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia! Recuperas 50."
+                    else:
+                        $ accion_realizada = True
+                        "Ataque! [danio] de danio."
+                "Toque Helado - 100 magia (-20%% ATQ enemigo)":
+                    $ danio = heroe.toque_helado(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "TOQUE HELADO! [danio] de danio. ATQ enemigo: [enemigo.get_ataque_basico()]"
+                "Miasma Necrotico - 400 magia":
+                    $ danio = heroe.miasma_necrotico(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "MIASMA! [danio] de danio."
+                "Invocar Esqueleto - 250 magia":
+                    $ resultado = heroe.invocar_esqueleto()
+                    if resultado == False:
+                        "No tienes suficiente magia o invocaciones!"
+                    else:
+                        $ accion_realizada = True
+                        "Esqueleto invocado! Restantes: [heroe.get_invocaciones()]"
+                "Drenaje Masivo - 200 magia":
+                    $ danio = heroe.drenaje_masivo(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "DRENAJE! [danio] de danio. HP: [heroe.get_vida()] | MAGIA: [heroe.get_magia()]"
+                "Maldicion - 300 magia (-50%% DEF enemigo)":
+                    $ resultado = heroe.maldicion(enemigo)
+                    if resultado == False:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "DEF enemigo reducida a [enemigo.get_defensa()]"
+                "Ejercito de Muertos":
+                    $ danio = heroe.ejercito_de_muertos(enemigo)
+                    if danio == 0:
+                        "No tienes invocaciones disponibles!"
+                    else:
+                        $ accion_realizada = True
+                        "EJERCITO! [danio] de danio. Invocaciones: [heroe.get_invocaciones()]"
+                "Ataque Espectral - 50 magia":
+                    $ danio = heroe.ataque_espectral(enemigo)
+                    if danio == 0:
+                        "No tienes suficiente magia!"
+                    else:
+                        $ accion_realizada = True
+                        "Espectral! [danio] de danio."
+                "Curar - 40 magia":
+                    $ curado = heroe.curar()
+                    if curado == 0:
+                        "No tienes suficiente magia o vida llena!"
+                    else:
+                        $ accion_realizada = True
+                        "HP recuperado: [curado]"
+                "Regenerar Magia":
+                    $ restaurado = heroe.regenerar_magia()
+                    $ accion_realizada = True
+                    "MAGIA restaurada: [restaurado]"
+                "Huir":
+                    "Escapaste!"
+                    return
+
 
         else:
             menu:
@@ -1065,6 +1271,21 @@ label armar_ejercito:
                 $ ejercito.append(unidad)
                 "Agregaste un Lich."
                 jump armar_ejercito
+            "Sacerdotisa":
+                $ unidad = Sacerdotisa(px, py)
+                $ ejercito.append(unidad)
+                "Agregaste una Sacerdotisa."
+                jump armar_ejercito
+            "Demonia":
+                $ unidad = Demonia(px, py)
+                $ ejercito.append(unidad)
+                "Agregaste una Demonia."
+                jump armar_ejercito
+            "Licha":
+                $ unidad = Licha(px, py)
+                $ ejercito.append(unidad)
+                "Agregaste una Licha."
+                jump armar_ejercito
             "Terminar de armar ejercito":
                 if total == 0:
                     "No tenes unidades, selecciona al menos una!"
@@ -1124,6 +1345,15 @@ label armar_ejercito_j1:
             "Dragon":
                 $ ejercito_j1.append(Dragon("J1_Dragon", 1800, 280, 130, 2, 3, 280, px, py, 0, True, 2500, 0, 0))
                 jump armar_ejercito_j1
+            "Sacerdotisa":
+                $ ejercito_j1.append(Sacerdotisa(px, py))
+                jump armar_ejercito_j1
+            "Demonia":
+                $ ejercito_j1.append(Demonia(px, py))
+                jump armar_ejercito_j1
+            "Licha":
+                $ ejercito_j1.append(Licha(px, py))
+                jump armar_ejercito_j1
             "Terminar":
                 if total == 0:
                     "Elegi al menos una unidad!"
@@ -1162,6 +1392,15 @@ label armar_ejercito_j2:
                 jump armar_ejercito_j2
             "Dragon":
                 $ ejercito_j2.append(Dragon("J2_Dragon", 1800, 280, 130, 2, 3, 280, px, py, 0, True, 2500, 0, 0))
+                jump armar_ejercito_j2
+            "Sacerdotisa":
+                $ ejercito_j2.append(Sacerdotisa(px, py))
+                jump armar_ejercito_j2
+            "Demonia":
+                $ ejercito_j2.append(Demonia(px, py))
+                jump armar_ejercito_j2
+            "Licha":
+                $ ejercito_j2.append(Licha(px, py))
                 jump armar_ejercito_j2
             "Terminar":
                 if total == 0:

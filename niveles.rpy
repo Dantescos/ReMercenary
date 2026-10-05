@@ -41,6 +41,7 @@ init python:
             Arquero("Elfo Corrompido", 100, 22, 12, 4, 4, 28, 1, 0, 0, True, 25, 10),
             Mago("Brujo del Bosque", 120, 20, 10, 3, 3, 35, 2, 0, 0, True, 80, 80, 8, 8, 8),
             Guerrero("Troll", 180, 35, 18, 3, 1, 40, 3, 0, 0, True),
+            Sacerdotisa(5, 0),   # NUEVA: Sanadora oscura del bosque
         ]
         posiciones = [(x, y) for x in range(8) for y in [0, 1]]
         random.shuffle(posiciones)
@@ -56,6 +57,7 @@ init python:
             Arquero("Arquero Espectral", 130, 28, 14, 4, 4, 32, 1, 0, 0, True, 30, 10),
             Clerigo("Sacerdote Oscuro", 170, 18, 20, 3, 2, 25, 2, 0, 0, True, 150),
             Lich("Lich Menor", 160, 30, 18, 3, 2, 48, 3, 0, 0, True, 250),
+            Licha(5, 0),         # NUEVA: Licha de la cripta
         ]
         posiciones = [(x, y) for x in range(8) for y in [0, 1]]
         random.shuffle(posiciones)
@@ -72,6 +74,7 @@ init python:
             Mago("Mago de Batalla", 180, 30, 20, 3, 3, 50, 2, 0, 0, True, 200, 200, 15, 15, 15),
             Clerigo("Sanador Imperial", 200, 20, 25, 3, 2, 30, 3, 0, 0, True, 200),
             Dragon("Dragon Rojo", 400, 70, 35, 2, 3, 80, 4, 0, 0, True, 600, 0, 0),
+            Demonia(5, 0),       # NUEVA: Demonia al servicio del Imperio
         ]
         posiciones = [(x, y) for x in range(8) for y in [0, 1]]
         random.shuffle(posiciones)
@@ -88,6 +91,7 @@ init python:
             General("Campeon del Abismo", 450, 65, 45, 3, 2, 75, 2, 0, 0, True, 1200, 600),
             ArchiMago("Archimago Oscuro", 400, 60, 35, 3, 4, 100, 3, 0, 0, True, 1200, 100),
             Mago("Hechicero del Caos", 220, 45, 25, 4, 3, 65, 4, 0, 0, True, 300, 300, 20, 20, 20),
+            Licha(5, 0),         # NUEVA: Licha del abismo
         ]
         posiciones = [(x, y) for x in range(8) for y in [0, 1]]
         random.shuffle(posiciones)
@@ -104,6 +108,9 @@ init python:
             Dragon("Dragon Ancestral", 600, 100, 50, 2, 3, 120, 2, 0, 0, True, 1000, 0, 0),
             Lich("Rey Lich", 400, 60, 40, 3, 3, 90, 3, 0, 0, True, 600),
             Guerrero("Verdugo Real", 500, 90, 50, 4, 1, 110, 5, 0, 0, True),
+            Demonia(6, 0),       # NUEVA: Demonia del trono
+            Licha(7, 0),         # NUEVA: Licha del trono
+            Sacerdotisa(4, 0),   # NUEVA: Sacerdotisa corrupta
         ]
         posiciones = [(x, y) for x in range(8) for y in [0, 1]]
         random.shuffle(posiciones)
@@ -117,7 +124,7 @@ init python:
         posiciones = [(x, y) for x in range(8) for y in [0, 1]]
         random.shuffle(posiciones)
         enemigos = []
-        tipos = ["Guerrero", "Mago", "Arquero", "Lich", "Dragon", "General"]
+        tipos = ["Guerrero", "Mago", "Arquero", "Lich", "Dragon", "General", "Sacerdotisa", "Demonia", "Licha"]
         for i in range(min(cantidad, len(posiciones))):
             x, y = posiciones[i]
             tipo = random.choice(tipos)
@@ -133,6 +140,12 @@ init python:
                 enemigos.append(Dragon("Dragon", 300, 60, 30, 2, 3, 70, x, y, 0, True, 500, 0, 0))
             elif tipo == "General":
                 enemigos.append(General("General", 250, 30, 20, 3, 2, 40, x, y, 0, True, 1000, 500))
+            elif tipo == "Sacerdotisa":
+                enemigos.append(Sacerdotisa(x, y))
+            elif tipo == "Demonia":
+                enemigos.append(Demonia(x, y))
+            elif tipo == "Licha":
+                enemigos.append(Licha(x, y))
         return enemigos
 
 # ============================================================

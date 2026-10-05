@@ -583,7 +583,6 @@ init python:
     # ========================================================
     class Kazuki(Mago):
         def __init__(self, x, y):
-            # HP 1500 | ATK 250 | DEF 100 | daño esp 250 | magia 500/5000
             super(Kazuki, self).__init__("Kazuki", 1500, 250, 100, 4, 3, 250, x, y, 0, True, 500, 5000, 20, 20, 20)
 
         def potenciar_aliado(self, aliado=None):
@@ -595,7 +594,6 @@ init python:
 
     class Lyra(Arquero):
         def __init__(self, x, y):
-            # HP 1200 | ATK 250 | DEF 90 | daño esp 250 | carcaj 80 | esp 40
             super(Lyra, self).__init__("Lyra", 1200, 250, 90, 5, 4, 250, x, y, 0, True, 80, 40)
 
         def flecha_perforante(self, objetivo):
@@ -607,9 +605,148 @@ init python:
 
     class Gromm(Guerrero):
         def __init__(self, x, y):
-            # HP 3000 | ATK 200 | DEF 220 | daño esp 200 (tanque)
             super(Gromm, self).__init__("Gromm", 3000, 200, 220, 3, 1, 200, x, y, 0, True)
 
         def escudo_levantado(self):
             self.set_defensa(self.get_defensa() * 2)
             return self.get_defensa()
+
+    # ========================================================
+    # SACERDOTISA (nueva ficha jugable/enemiga)
+    # ========================================================
+    class Sacerdotisa(Clerigo):
+        def __init__(self, x, y):
+            super(Sacerdotisa, self).__init__("Sacerdotisa", 1400, 160, 130, 3, 3, 200, x, y, 0, True, 2500)
+
+        def bendicion_divina(self, aliados):
+            if self.get_magia() >= 350:
+                self.set_magia(self.get_magia() - 350)
+                curados = 0
+                for a in aliados:
+                    if a.get_visible() and a.esta_vivo() and a.get_vida() < a.get_vida_max():
+                        a.set_vida(a.get_vida() + 120)
+                        curados += 1
+                self.set_vida(self.get_vida() + 120)
+                return curados
+            return 0
+
+        def escudo_sagrado(self, aliado):
+            if self.get_magia() >= 250:
+                self.set_magia(self.get_magia() - 250)
+                aliado.set_defensa(aliado.get_defensa() + 500)
+                return aliado.get_defensa()
+            return 0
+
+        def castigo_celestial(self, enemigo):
+            if self.get_magia() >= 500:
+                self.set_magia(self.get_magia() - 500)
+                danio = int(self.get_ataque_especial() * 2.0)
+                enemigo.set_vida(enemigo.get_vida() - danio)
+                return danio
+            return 0
+
+        def resurreccion(self, aliado):
+            if self.get_magia() >= 1000 and not aliado.esta_vivo():
+                self.set_magia(self.get_magia() - 1000)
+                aliado.set_vida(int(aliado.get_vida_max() * 0.5))
+                aliado.set_visible(True)
+                return True
+            return False
+
+    # ========================================================
+    # DEMONIA (nueva ficha jugable/enemiga)
+    # ========================================================
+    class Demonia(Dragon):
+        def __init__(self, x, y):
+            super(Demonia, self).__init__("Demonia", 2200, 240, 110, 4, 2, 280, x, y, 0, True, 1800, 0, 0)
+
+        def latigazo_infernal(self, enemigo):
+            if self.get_magia() >= 200:
+                self.set_magia(self.get_magia() - 200)
+                danio = int(self.get_ataque_especial() * 1.8)
+                enemigo.set_vida(enemigo.get_vida() - danio)
+                enemigo.set_vida(max(0, enemigo.get_vida() - 30))
+                return danio + 30
+            return 0
+
+        def beso_drenante(self, enemigo):
+            if self.get_magia() >= 150:
+                self.set_magia(self.get_magia() - 150)
+                danio = enemigo.defenderse_recibir_danio(int(self.get_ataque_basico() * 1.3))
+                robo = int(danio * 0.7)
+                self.set_vida(self.get_vida() + robo)
+                return danio
+            return 0
+
+        def alas_de_fuego(self):
+            if self.get_magia() >= 300:
+                self.set_magia(self.get_magia() - 300)
+                self.set_ataque_basico(int(self.get_ataque_basico() * 1.3))
+                self.set_puntos_mov(self.get_puntos_mov() + 1)
+                return self.get_ataque_basico()
+            return 0
+
+        def explosion_infernal(self, enemigo):
+            if self.get_vida() > 500:
+                coste = 400
+                self.set_vida(self.get_vida() - coste)
+                danio = int(self.get_ataque_especial() * 4.0)
+                return enemigo.defenderse_recibir_danio(danio)
+            return 0
+
+    # ========================================================
+    # LICHA (nueva ficha jugable/enemiga)
+    # ========================================================
+    class Licha(Lich):
+        def __init__(self, x, y):
+            super(Licha, self).__init__("Licha", 1800, 230, 120, 3, 3, 270, x, y, 0, True, 3000)
+            self.__invocaciones = 3
+
+        def get_invocaciones(self):
+            return self.__invocaciones
+
+        def toque_helado(self, enemigo):
+            if self.get_magia() >= 100:
+                self.set_magia(self.get_magia() - 100)
+                danio = enemigo.defenderse_recibir_danio(int(self.get_ataque_basico() * 1.4))
+                enemigo.set_ataque_basico(int(enemigo.get_ataque_basico() * 0.8))
+                return danio
+            return 0
+
+        def miasma_necrotico(self, enemigo):
+            if self.get_magia() >= 400:
+                self.set_magia(self.get_magia() - 400)
+                danio = int(self.get_ataque_especial() * 2.5)
+                return enemigo.defenderse_recibir_danio(danio)
+            return 0
+
+        def invocar_esqueleto(self):
+            if self.__invocaciones > 0 and self.get_magia() >= 250:
+                self.__invocaciones -= 1
+                self.set_magia(self.get_magia() - 250)
+                return True
+            return False
+
+        def drenaje_masivo(self, enemigo):
+            if self.get_magia() >= 200:
+                self.set_magia(self.get_magia() - 200)
+                danio = enemigo.defenderse_recibir_danio(int(self.get_ataque_basico() * 1.8))
+                robo_vida = int(danio * 0.6)
+                self.set_vida(self.get_vida() + robo_vida)
+                self.set_magia(self.get_magia() + 100)
+                return danio
+            return 0
+
+        def maldicion(self, enemigo):
+            if self.get_magia() >= 300:
+                self.set_magia(self.get_magia() - 300)
+                enemigo.set_defensa(int(enemigo.get_defensa() * 0.5))
+                return True
+            return False
+
+        def ejercito_de_muertos(self, enemigo):
+            if self.__invocaciones > 0:
+                self.__invocaciones -= 1
+                danio = int(self.get_ataque_especial() * 3.5)
+                return enemigo.defenderse_recibir_danio(danio)
+            return 0
