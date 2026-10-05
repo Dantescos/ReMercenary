@@ -120,6 +120,111 @@ screen game_menu(title=None, scroll=None, yinitial=0.0):
             action Quit(confirm=True)
 
 
+screen save():
+
+    tag menu
+
+    add "negro2.png"
+
+    use file_slots("Guardar")
+    imagebutton:
+        idle "volver_idle.png"
+        hover "volver_hover.png"
+        focus_mask True
+
+        action Return()
+
+
+screen load():
+
+    tag menu
+
+    add "negro1.png"
+
+    use file_slots("Cargar")
+
+    imagebutton:
+        idle "volver_idle.png"
+        hover "volver_hover.png"
+        focus_mask True
+
+        action Return()
+
+
+screen file_slots(title):
+
+    tag menu
+
+
+    text title:
+        xalign 0.5
+        ypos 20
+        size 50
+        color "#FFFFFF"
+
+    grid 3 2:
+
+        xalign 0.5
+        yalign 0.45
+
+        spacing 20
+
+        for i in range(6):
+
+            $ slot = i + 1
+
+            button:
+
+                xsize 350
+                ysize 220
+
+                action FileAction(slot)
+
+                has vbox
+
+                add FileScreenshot(slot):
+                    xalign 0.5
+
+                text FileTime(
+                    slot,
+                    format="%d/%m/%Y %H:%M",
+                    empty="Ranura vacía"
+                ):
+                    xalign 0.5
+
+                text FileSaveName(slot):
+                    xalign 0.5
+
+                key "save_delete" action FileDelete(slot)
+
+    hbox:
+
+        xalign 0.5
+        ypos 700
+
+        spacing 10
+
+        textbutton "<":
+            action FilePagePrevious()
+
+        for page in range(1, 11):
+
+            textbutton "[page]":
+                action FilePage(page)
+
+        textbutton ">":
+            action FilePageNext()
+
+    textbutton "Volver":
+
+        xalign 0.5
+        ypos 760
+
+        action Return()
+
+
+
+
 screen choice(items):
     style_prefix "choice"
 
