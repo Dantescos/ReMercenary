@@ -349,13 +349,48 @@ screen creditos_animados():
             color "#ffffff"
 
         null height 30
+        text "Antonio Garcia":
+            xalign 0.5
+            size 28
+            color "#cccccc"
 
         text "Nahuel Zanini":
             xalign 0.5
             size 28
             color "#cccccc"
 
-        text "Antonio Garcia":
+        text "Mateo Dabruzzo Wilczek":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Federico 'Fedelobo' ":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Ignacio":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Thiago":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+
+        
+        text "Pablo Laporta":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Fernando 'Master":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Joaquin Arana":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -366,15 +401,48 @@ screen creditos_animados():
             xalign 0.5
             size 35
             color "#ffffff"
-
         null height 30
+        text "Antonio Garcia":
+            xalign 0.5
+            size 28
+            color "#cccccc"
 
         text "Nahuel Zanini":
             xalign 0.5
             size 28
             color "#cccccc"
 
-        text "Antonio Garcia":
+        text "Mateo Dabruzzo Wilczek":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Federico 'Fedelobo' ":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Ignacio":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Thiago":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Pablo Laporta":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Fernando 'Master":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Joaquin Arana":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -385,10 +453,48 @@ screen creditos_animados():
             xalign 0.5
             size 35
             color "#ffffff"
-
         null height 30
+        text "Antonio Garcia":
+            xalign 0.5
+            size 28
+            color "#cccccc"
 
-        text "(nombres)":
+        text "Nahuel Zanini":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+
+        text "Mateo Dabruzzo Wilczek":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Federico 'Fedelobo' ":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Ignacio":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Thiago":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+
+        text "Pablo Laporta":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Fernando 'Master":
+            xalign 0.5
+            size 28
+            color "#cccccc"
+        
+        text "Joaquin Arana":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -416,7 +522,7 @@ screen creditos_animados():
 
         null height 500
 
-    textbutton "Volver al menú":
+    textbutton "Volver al menu":
         xalign 0.98
         yalign 0.98
         text_size 24
