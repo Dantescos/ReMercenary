@@ -1,5 +1,5 @@
 ﻿# ============================================================
-# RE: MERCENARY - SCRIPT PRINCIPAL (VERSIÓN FINAL CORREGIDA)
+# RE: MERCENARY - SCRIPT PRINCIPAL
 # ============================================================
 default turno_jugador = True
 default jugador_x = 0
@@ -27,7 +27,6 @@ default ejercito_j1 = []
 default ejercito_j2 = []
 default turno_actual = 1
 default tablero_actual = "tablero.png"
-default boss_aleatorio_pendiente = False
 
 image pantalla_inicio = "pantalla_inicio.png"
 image portada = "portada.png"
@@ -203,7 +202,7 @@ init python:
         return None
 
 # ============================================================
-# CLICK EN CASILLA (MODO NORMAL)
+# CLICK EN CASILLA
 # ============================================================
 init python:
     def click_casilla(x, y):
@@ -281,21 +280,17 @@ init python:
                     return
 
         if not quedan_enemigos_vivos() and not store.boss_spawneado:
-            bx, by = 4, 0
-            nuevo_boss = None
             if store.nivel_actual >= 1 and store.nivel_actual <= 7:
+                bx, by = 4, 0
                 nuevo_boss = crear_boss_por_nivel(store.nivel_actual, bx, by)
-            elif store.nivel_actual == 0:
-                nuevo_boss = crear_boss_aleatorio(bx, by)
-
-            if nuevo_boss is not None:
-                store.enemigos.append(nuevo_boss)
-                store.boss_spawneado = True
-                try:
-                    reproducir_musica("Boss" + str(store.nivel_actual) + ".wav", fadein=0.5, loop=True)
-                except:
-                    pass
-                renpy.notify("¡EL BOSS HA APARECIDO!")
+                if nuevo_boss is not None:
+                    store.enemigos.append(nuevo_boss)
+                    store.boss_spawneado = True
+                    try:
+                        reproducir_musica("Boss" + str(store.nivel_actual) + ".wav", fadein=0.5, loop=True)
+                    except:
+                        pass
+                    renpy.notify("EL BOSS HA APARECIDO!")
 
         if store.boss_spawneado and not quedan_enemigos_vivos():
             store.resultado_batalla = "victoria"
@@ -312,9 +307,6 @@ init python:
         store.unidad_seleccionada = None
         renpy.notify("Tu turno")
 
-# ============================================================
-# CLICK EN CASILLA (MODO VERSUS)
-# ============================================================
 init python:
     def click_casilla_versus(x, y):
         if store.turno_actual == 1:
@@ -354,7 +346,6 @@ init python:
             if enemigo.get_visible() and enemigo.esta_vivo() and enemigo.get_x() == x and enemigo.get_y() == y:
                 renpy.call_in_new_context("combate_versus", unidad, enemigo)
                 cambiar_turno()
-
                 if not hay_unidades_vivas(store.ejercito_j1):
                     store.resultado_batalla = "j2_gana"
                     store.partida_terminada = True
@@ -380,7 +371,7 @@ init python:
             return
 
 # ============================================================
-# COMBATE (MODO NORMAL)
+# COMBATE
 # ============================================================
 label combate(heroe, enemigo):
     python:
@@ -947,7 +938,6 @@ label combate(heroe, enemigo):
                 "Huir":
                     "Escapaste!"
                     return
-
         # SACERDOTISA
         elif clase == "Sacerdotisa":
             $ info_sac = "Sacerdotisa - MAGIA: " + str(heroe.get_magia()) + "/" + str(heroe.get_magia_max())
@@ -1203,487 +1193,22 @@ label combate(heroe, enemigo):
 # COMBATE VERSUS
 # ============================================================
 label combate_versus(atacante, defensor):
-    call menu_habilidad_versus(atacante, defensor) from _call_menu_atk_vs
+    while atacante.esta_vivo() and defensor.esta_vivo():
+        $ d = aplicar_danio_basico(atacante, defensor)
+        "[atacante.get_clase()] ataca a [defensor.get_clase()] por [d] de danio!"
 
-    if not defensor.esta_vivo():
-        $ defensor.set_visible(False)
-        "[defensor.get_clase()] HA SIDO DERROTADO!"
-        return
+        if not defensor.esta_vivo():
+            "[defensor.get_clase()] ha caido!"
+            $ defensor.set_visible(False)
+            return
 
-    call menu_habilidad_versus(defensor, atacante) from _call_menu_def_vs
+        $ c = aplicar_danio_basico(defensor, atacante) // 2
+        "[defensor.get_clase()] contraataca por [c] de danio!"
 
-    if not atacante.esta_vivo():
-        $ atacante.set_visible(False)
-        "[atacante.get_clase()] HA SIDO DERROTADO!"
-        return
-    return
-
-
-# ============================================================
-# MENU DE HABILIDAD PARA VERSUS (CON HP VISIBLE - SIN ERRORES)
-# ============================================================
-label menu_habilidad_versus(unidad, objetivo):
-    $ clase_u = unidad.get_clase()
-    $ clase_o = objetivo.get_clase()
-    $ accion_realizada = False
-
-    $ hp_u = "HP: " + str(unidad.get_vida()) + "/" + str(unidad.get_vida_max())
-    $ hp_o = "HP: " + str(objetivo.get_vida()) + "/" + str(objetivo.get_vida_max())
-    $ linea_objetivo = "Objetivo: " + clase_o + " - " + hp_o
-
-    # ---------------- DEMONIA (hereda Dragon) ----------------
-    if isinstance(unidad, store.Demonia):
-        $ info_v = clase_u + " - " + hp_u + " | MAGIA: " + str(unidad.get_magia()) + "/" + str(unidad.get_magia_max())
-        "[linea_objetivo]"
-        menu:
-            "[info_v]"
-            "Ataque basico (100 magia)":
-                $ danio = unidad.ataque_basico(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia! Recuperas 50."
-                else:
-                    $ accion_realizada = True
-                    "Hiciste [danio] de danio."
-            "Latigazo Infernal (200 magia)":
-                $ danio = unidad.latigazo_infernal(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Latigazo! [danio] de danio."
-            "Beso Drenante (150 magia)":
-                $ danio = unidad.beso_drenante(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Drenaje! [danio] de danio."
-            "Alas de Fuego (300 magia)":
-                $ resultado = unidad.alas_de_fuego()
-                if resultado == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "ATQ: [unidad.get_ataque_basico()]"
-            "Recuperar Magia +100":
-                $ unidad.recuperacion_draconica(100)
-                $ accion_realizada = True
-                "MAGIA: [unidad.get_magia()]"
-
-    # ---------------- LICHA (hereda Lich) ----------------
-    elif isinstance(unidad, store.Licha):
-        $ info_v = clase_u + " - " + hp_u + " | MAGIA: " + str(unidad.get_magia()) + "/" + str(unidad.get_magia_max()) + " | INVOC: " + str(unidad.get_invocaciones())
-        "[linea_objetivo]"
-        menu:
-            "[info_v]"
-            "Ataque basico (100 magia)":
-                $ danio = unidad.ataque_basico(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia! Recuperas 50."
-                else:
-                    $ accion_realizada = True
-                    "Hiciste [danio] de danio."
-            "Toque Helado (100 magia)":
-                $ danio = unidad.toque_helado(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Toque Helado! [danio] de danio."
-            "Miasma Necrotico (400 magia)":
-                $ danio = unidad.miasma_necrotico(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Miasma! [danio] de danio."
-            "Drenaje Masivo (200 magia)":
-                $ danio = unidad.drenaje_masivo(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Drenaje! [danio] de danio."
-            "Ejercito de Muertos":
-                $ danio = unidad.ejercito_de_muertos(objetivo)
-                if danio == 0:
-                    "No tienes invocaciones disponibles!"
-                else:
-                    $ accion_realizada = True
-                    "Ejercito! [danio] de danio."
-            "Curar (40 magia)":
-                $ curado = unidad.curar()
-                if curado == 0:
-                    "No tienes suficiente magia o vida llena!"
-                else:
-                    $ accion_realizada = True
-                    "HP recuperado: [curado]"
-            "Regenerar Magia":
-                $ restaurado = unidad.regenerar_magia()
-                $ accion_realizada = True
-                "MAGIA restaurada: [restaurado]"
-
-    # ---------------- SACERDOTISA (hereda Clerigo) ----------------
-    elif isinstance(unidad, store.Sacerdotisa):
-        $ info_v = clase_u + " - " + hp_u + " | MAGIA: " + str(unidad.get_magia()) + "/" + str(unidad.get_magia_max())
-        "[linea_objetivo]"
-        menu:
-            "[info_v]"
-            "Ataque basico (100 magia)":
-                $ danio = unidad.ataque_basico(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia! Recuperas 50."
-                else:
-                    $ accion_realizada = True
-                    "Hiciste [danio] de danio."
-            "Palabras de Fe (100 magia)":
-                $ resultado = unidad.palabras_de_fe(objetivo)
-                if resultado == False:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "ATQ enemigo reducido a [objetivo.get_ataque_basico()]"
-            "Luz Cegadora (300 magia)":
-                $ danio = unidad.luz_cegadora_dia(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Luz! [danio] de danio."
-            "Castigo Celestial (500 magia)":
-                $ danio = unidad.castigo_celestial(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Castigo! [danio] de danio."
-            "Escudo Sagrado (250 magia)":
-                $ resultado = unidad.escudo_sagrado(unidad)
-                if resultado == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "DEF: [unidad.get_defensa()]"
-            "Recuperar Magia +200":
-                $ unidad.recuperacion_sagrada(200)
-                $ accion_realizada = True
-                "MAGIA: [unidad.get_magia()]"
-
-    # ---------------- ARCHIMAGO ----------------
-    elif isinstance(unidad, store.ArchiMago):
-        $ info_v = clase_u + " - " + hp_u + " | MAGIA: " + str(unidad.get_magia()) + "/" + str(unidad.get_magia_max())
-        "[linea_objetivo]"
-        menu:
-            "[info_v]"
-            "Ataque basico (100 magia)":
-                $ danio = unidad.ataque_basico(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia! Recuperas 50."
-                else:
-                    $ accion_realizada = True
-                    "Hiciste [danio] de danio."
-            "Ataque Especial (300 magia)":
-                $ danio = unidad.ataque_especial(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Especial! [danio] de danio."
-            "Ataque Gelido (259 magia)":
-                $ danio = unidad.ataque_gelido(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Gelido! [danio] de danio."
-            "Relampago (365 magia)":
-                $ danio = unidad.ataque_magico_relampago(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Relampago! [danio] de danio."
-            "Ataque Final (1000 magia)":
-                $ danio = unidad.ataque_final(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "FINAL! [danio] de danio."
-            "Recuperar Magia +200":
-                $ unidad.recuperar_magia(200)
-                $ accion_realizada = True
-                "MAGIA: [unidad.get_magia()]"
-
-    # ---------------- LICH ----------------
-    elif isinstance(unidad, store.Lich):
-        $ info_v = clase_u + " - " + hp_u + " | MAGIA: " + str(unidad.get_magia()) + "/" + str(unidad.get_magia_max())
-        "[linea_objetivo]"
-        menu:
-            "[info_v]"
-            "Ataque basico (100 magia)":
-                $ danio = unidad.ataque_basico(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia! Recuperas 50."
-                else:
-                    $ accion_realizada = True
-                    "Hiciste [danio] de danio."
-            "Ataque Espectral (50 magia)":
-                $ danio = unidad.ataque_espectral(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Espectral! [danio] de danio."
-            "Drenar Vida (30 magia)":
-                $ danio = unidad.drenar_vida(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Drenar! [danio] de danio."
-            "Ataque Masivo (100 magia)":
-                $ danio = unidad.ataque_masivo(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Masivo! [danio] de danio."
-            "Curar (40 magia)":
-                $ curado = unidad.curar()
-                if curado == 0:
-                    "No tienes suficiente magia o vida llena!"
-                else:
-                    $ accion_realizada = True
-                    "HP recuperado: [curado]"
-            "Regenerar Magia":
-                $ restaurado = unidad.regenerar_magia()
-                $ accion_realizada = True
-                "MAGIA restaurada: [restaurado]"
-
-    # ---------------- CLERIGO ----------------
-    elif isinstance(unidad, store.Clerigo):
-        $ info_v = clase_u + " - " + hp_u + " | MAGIA: " + str(unidad.get_magia()) + "/" + str(unidad.get_magia_max())
-        "[linea_objetivo]"
-        menu:
-            "[info_v]"
-            "Ataque basico (100 magia)":
-                $ danio = unidad.ataque_basico(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia! Recuperas 50."
-                else:
-                    $ accion_realizada = True
-                    "Hiciste [danio] de danio."
-            "Palabras de Fe (100 magia)":
-                $ resultado = unidad.palabras_de_fe(objetivo)
-                if resultado == False:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "ATQ enemigo reducido a [objetivo.get_ataque_basico()]"
-            "Luz Cegadora (300 magia)":
-                $ danio = unidad.luz_cegadora_dia(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Luz! [danio] de danio."
-            "Exorcismo (400 magia)":
-                $ danio = unidad.exorcismo(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Exorcismo! [danio] de danio."
-            "Escudo de Fe (200 magia)":
-                $ resultado = unidad.escudo_de_fe_magico()
-                if resultado == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "DEF: [unidad.get_defensa()]"
-            "Recuperar Magia +200":
-                $ unidad.recuperacion_sagrada(200)
-                $ accion_realizada = True
-                "MAGIA: [unidad.get_magia()]"
-
-    # ---------------- DRAGON ----------------
-    elif isinstance(unidad, store.Dragon):
-        $ info_v = clase_u + " - " + hp_u + " | MAGIA: " + str(unidad.get_magia()) + "/" + str(unidad.get_magia_max())
-        "[linea_objetivo]"
-        menu:
-            "[info_v]"
-            "Ataque basico (100 magia)":
-                $ danio = unidad.ataque_basico(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia! Recuperas 50."
-                else:
-                    $ accion_realizada = True
-                    "Hiciste [danio] de danio."
-            "Llamarada Infernal (200 magia)":
-                $ danio = unidad.ataque_llamarada_infernal(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Llamarada! [danio] de danio."
-            "Ataque de Espinas (100 magia)":
-                $ danio = unidad.ataque_espinas(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Espinas! [danio] de danio."
-            "Rayo de Luz (150 magia)":
-                $ danio = unidad.ataque_luz(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia!"
-                else:
-                    $ accion_realizada = True
-                    "Rayo de Luz! [danio] de danio."
-            "Regeneracion":
-                $ restaurado = unidad.regeneracion_dragon()
-                $ accion_realizada = True
-                "HP recuperado: [restaurado]"
-            "Recuperar Magia +100":
-                $ unidad.recuperacion_draconica(100)
-                $ accion_realizada = True
-                "MAGIA: [unidad.get_magia()]"
-
-    # ---------------- MAGO ----------------
-    elif isinstance(unidad, store.Mago):
-        $ info_v = clase_u + " - " + hp_u + " | MAGIA: " + str(unidad.get_magia()) + "/" + str(unidad.get_magia_max())
-        "[linea_objetivo]"
-        menu:
-            "[info_v]"
-            "Ataque basico (100 magia)":
-                $ danio = unidad.ataque_basico(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia! Recuperas 50."
-                else:
-                    $ accion_realizada = True
-                    "Hiciste [danio] de danio."
-            "Bola de Fuego Mejorada (200 magia)":
-                $ danio = unidad.bola_fuego_mejorada(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia o usos!"
-                else:
-                    $ accion_realizada = True
-                    "Bola! [danio] de danio."
-            "Hielo Infernal (100 magia)":
-                $ danio = unidad.ataque_hielo_infernal(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia o usos!"
-                else:
-                    $ accion_realizada = True
-                    "Hielo! [danio] de danio."
-            "Castigo Divino (300 magia)":
-                $ danio = unidad.ataque_castigo_divino(objetivo)
-                if danio == 0:
-                    "No tienes suficiente magia o usos!"
-                else:
-                    $ accion_realizada = True
-                    "Castigo! [danio] de danio."
-            "Curacion Magica (290 magia)":
-                $ curado = unidad.curacion_magica()
-                if curado == 0:
-                    "No tienes suficiente magia o vida llena!"
-                else:
-                    $ accion_realizada = True
-                    "HP recuperado: [curado]"
-            "Recuperar Magia +200":
-                $ unidad.recuperar_magia(200)
-                $ accion_realizada = True
-                "MAGIA: [unidad.get_magia()]"
-
-    # ---------------- GUERRERO ----------------
-    elif isinstance(unidad, store.Guerrero):
-        $ info_v = clase_u + " - " + hp_u + " | ATQ: " + str(unidad.get_ataque_basico()) + " | DEF: " + str(unidad.get_defensa())
-        "[linea_objetivo]"
-        menu:
-            "[info_v]"
-            "Atacar":
-                $ danio = unidad.ataque_basico(objetivo)
-                $ accion_realizada = True
-                "Hiciste [danio] de danio."
-            "Testudo (+DEF x2)":
-                $ unidad.testudo()
-                $ accion_realizada = True
-                "DEF: [unidad.get_defensa()]"
-            "Arremeter (+20 ATQ)":
-                $ unidad.arremeter()
-                $ accion_realizada = True
-                "ATQ: [unidad.get_ataque_basico()]"
-
-    # ---------------- ARQUERO ----------------
-    elif isinstance(unidad, store.Arquero):
-        $ info_v = clase_u + " - " + hp_u + " | FLECHAS: " + str(unidad.get_carcaj()) + " | ESP: " + str(unidad.get_flecha_trucada())
-        "[linea_objetivo]"
-        menu:
-            "[info_v]"
-            "Disparar Flecha":
-                $ danio = unidad.disparar_flechas(objetivo)
-                if danio == 0:
-                    "No tienes flechas!"
-                else:
-                    $ accion_realizada = True
-                    "Hiciste [danio] de danio."
-            "Flecha Especial":
-                $ danio = unidad.flechita_especial(objetivo)
-                if danio == 0:
-                    "No tienes flechas o esp!"
-                else:
-                    $ accion_realizada = True
-                    "Especial! [danio] de danio."
-            "Tiro Doble":
-                $ danio = unidad.tiro_doble(objetivo)
-                if danio == 0:
-                    "No tienes flechas o esp!"
-                else:
-                    $ accion_realizada = True
-                    "Tiro Doble! [danio] de danio."
-            "Recargar Carcaj":
-                $ unidad.recarga_rapida()
-                $ accion_realizada = True
-                "Flechas: [unidad.get_carcaj()] | Esp: [unidad.get_flecha_trucada()]"
-
-    # ---------------- GENERAL ----------------
-    elif isinstance(unidad, store.General):
-        $ info_v = clase_u + " - " + hp_u + " | ENERGIA: " + str(unidad.get_energia())
-        "[linea_objetivo]"
-        menu:
-            "[info_v]"
-            "Espada (100 energia)":
-                $ danio = unidad.espada(objetivo)
-                if danio == 0:
-                    "No tienes suficiente energia! Recuperas 200."
-                else:
-                    $ accion_realizada = True
-                    "Corte! [danio] de danio. ENERGIA: [unidad.get_energia()]"
-            "Canon de Mano (250 energia)":
-                $ danio = unidad.canon_de_mano(objetivo)
-                if danio == 0:
-                    "No tienes suficiente energia!"
-                else:
-                    $ accion_realizada = True
-                    "Canon! [danio] de danio. ENERGIA: [unidad.get_energia()]"
-            "Tiro Doble (350 energia)":
-                $ danio = unidad.tiro_doble(objetivo)
-                if danio == 0:
-                    "No tienes suficiente energia!"
-                else:
-                    $ accion_realizada = True
-                    "Tiro Doble! [danio] de danio. ENERGIA: [unidad.get_energia()]"
-
-    # ---------------- FALLBACK ----------------
-    else:
-        menu:
-            "[clase_u] - [hp_u] - Que haras?"
-            "Atacar":
-                $ danio = aplicar_danio_basico(unidad, objetivo)
-                $ accion_realizada = True
-                "Hiciste [danio] de danio."
-
+        if not atacante.esta_vivo():
+            "[atacante.get_clase()] ha caido!"
+            $ atacante.set_visible(False)
+            return
     return
 
 # ============================================================
@@ -1949,19 +1474,19 @@ label victoria_jugador:
     $ guardar_partida("partida")
 
     if nivel_actual == 1:
-        call dialogo_nivel1_victoria from _call_dialogo_nivel1_victoria
+        call dialogo_nivel1_victoria
     elif nivel_actual == 2:
-        call dialogo_nivel2_victoria from _call_dialogo_nivel2_victoria
+        call dialogo_nivel2_victoria
     elif nivel_actual == 3:
-        call dialogo_nivel3_victoria from _call_dialogo_nivel3_victoria
+        call dialogo_nivel3_victoria
     elif nivel_actual == 4:
-        call dialogo_nivel4_victoria from _call_dialogo_nivel4_victoria
+        call dialogo_nivel4_victoria
     elif nivel_actual == 5:
-        call dialogo_nivel5_victoria from _call_dialogo_nivel5_victoria
+        call dialogo_nivel5_victoria
     elif nivel_actual == 6:
-        call dialogo_nivel6_victoria from _call_dialogo_nivel6_victoria
+        call dialogo_nivel6_victoria
     elif nivel_actual == 7:
-        call dialogo_nivel7_victoria from _call_dialogo_nivel7_victoria
+        call dialogo_nivel7_victoria
         "HAS COMPLETADO EL JUEGO!"
         call screen creditos_animados
         jump menu_principal
@@ -2086,7 +1611,7 @@ screen tablero():
 
 
 # ============================================================
-# SCREEN: TABLERO VERSUS (CON PANEL DE VIDA)
+# SCREEN: TABLERO VERSUS
 # ============================================================
 screen tablero_versus():
     modal True
@@ -2105,7 +1630,6 @@ screen tablero_versus():
                     background None
                     action Function(click_casilla_versus, columna, fila)
 
-        # ---- EJERCITO J2 (arriba) ----
         for unidad in ejercito_j2:
             if unidad.get_visible():
                 frame:
@@ -2116,18 +1640,6 @@ screen tablero_versus():
                     ysize 100
                     add obtener_imagen_enemigo(unidad.get_clase())
 
-                frame:
-                    background "#000000AA"
-                    xpos OFFSET_X + unidad.get_x() * CASILLA_W + 25
-                    ypos OFFSET_Y + unidad.get_y() * CASILLA_H + 128
-                    xsize 100
-                    ysize 22
-                    text (str(unidad.get_vida()) + "/" + str(unidad.get_vida_max())):
-                        size 14
-                        color "#FFFFFF"
-                        xalign 0.5
-
-        # ---- EJERCITO J1 (abajo) ----
         for unidad in ejercito_j1:
             if unidad.get_visible():
                 frame:
@@ -2138,57 +1650,10 @@ screen tablero_versus():
                     ysize 100
                     add obtener_imagen_enemigo(unidad.get_clase())
 
-                frame:
-                    background "#000000AA"
-                    xpos OFFSET_X + unidad.get_x() * CASILLA_W + 25
-                    ypos OFFSET_Y + unidad.get_y() * CASILLA_H + 128
-                    xsize 100
-                    ysize 22
-                    text (str(unidad.get_vida()) + "/" + str(unidad.get_vida_max())):
-                        size 14
-                        color "#FFFFFF"
-                        xalign 0.5
-
-        # ---- PANEL IZQUIERDO: J1 ----
         frame:
             xpos 20
             ypos 20
             background "#00000088"
-            padding (15, 10)
-            vbox:
-                spacing 5
-                text "JUGADOR 1":
-                    size 26
-                    color "#88FF88"
-                for u in ejercito_j1:
-                    if u.get_visible():
-                        text (u.get_clase() + ": " + str(u.get_vida()) + "/" + str(u.get_vida_max())):
-                            size 18
-                            color "#FFFFFF"
-
-        # ---- PANEL DERECHO: J2 ----
-        frame:
-            xpos 1600
-            ypos 20
-            background "#00000088"
-            padding (15, 10)
-            vbox:
-                spacing 5
-                text "JUGADOR 2":
-                    size 26
-                    color "#FF8888"
-                for u in ejercito_j2:
-                    if u.get_visible():
-                        text (u.get_clase() + ": " + str(u.get_vida()) + "/" + str(u.get_vida_max())):
-                            size 18
-                            color "#FFFFFF"
-
-        # ---- TURNO ACTUAL ----
-        frame:
-            xpos 20
-            ypos 1000
-            background "#00000088"
-            padding (15, 10)
             text texto_turno:
                 size 30
 

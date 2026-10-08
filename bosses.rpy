@@ -23,6 +23,7 @@ define IMAGENES_BOSSES = {
 }
 
 init python:
+    import random
     def es_boss(clase):
         return clase in NOMBRES_BOSSES
 
@@ -52,7 +53,7 @@ init python:
         return "default.png"
 
     # ========================================================
-    # PROGRESIÓN DE JEFES
+    # PROGRESION DE JEFES
     # ========================================================
 
     def crear_boss_nivel1(x, y):
@@ -92,3 +93,17 @@ init python:
         elif nivel == 7:
             return crear_boss_nivel7(x, y)
         return None
+
+# ========================================================
+# JEFE ALEATORIO (para nivel aleatorio)
+# ========================================================
+    def crear_boss_aleatorio(x, y):
+        opciones = [crear_boss_nivel1,
+            crear_boss_nivel2,
+            crear_boss_nivel3,
+            crear_boss_nivel4,
+            crear_boss_nivel5,
+            crear_boss_nivel6,
+            crear_boss_nivel7,]
+        funcion_elegida = random.choice(opciones)
+        return funcion_elegida(x, y)

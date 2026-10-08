@@ -223,8 +223,6 @@ screen file_slots(title):
         action Return()
 
 
-
-
 screen choice(items):
     style_prefix "choice"
 
@@ -489,7 +487,7 @@ screen creditos_animados():
             size 28
             color "#cccccc"
         
-        text "Fernando 'Master":
+        text "Fernando 'Master' ":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -508,7 +506,7 @@ screen creditos_animados():
 
         null height 30
 
-        text "A nuestras familias y amigos":
+        text "A nuestras familias, Marcos (nuestro auxiliar) y amigos":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -536,3 +534,70 @@ screen creditos_animados():
 transform creditos_scroll:
     ypos 1.0
     linear 25.0 ypos -1.5
+
+## ============================================================
+# TAMAÑOS DE TEXTO GRANDES Y CENTRADOS
+# ============================================================
+
+# Dialogos de los personajes (abajo del juego)
+style say_dialogue:
+    size 38
+    line_spacing 8
+    xalign 0.5
+    text_align 0.5
+
+# El nombre del personaje que habla
+style say_label:
+    size 42
+    bold True
+    xalign 0.5
+    text_align 0.5
+
+# Titulo del menu (ej: "Kazuki - MAGIA: 100/250")
+style menu_label:
+    size 34
+    color "#ffff88"
+    bold True
+    xalign 0.5
+    text_align 0.5
+
+# Menus de opciones (Atacar, Huir, etc)
+style choice_button_text:
+    size 30
+    xalign 0.5
+    text_align 0.5
+
+# Texto narrativo
+style say_thought:
+    size 38
+    xalign 0.5
+    text_align 0.5
+
+# Texto de los notifies (mensajes)
+style notify_text:
+    size 26
+    xalign 0.5
+    text_align 0.5
+
+# Texto de los botones generales
+style button_text:
+    size 30
+    xalign 0.5
+    text_align 0.5
+
+# Texto de los labels de input
+style input_prompt:
+    size 32
+    xalign 0.5
+    text_align 0.5
+
+style window:
+    ysize 280
+    background "#000000cc"
+    padding (60, 30)
+    xalign 0.5
+
+style namebox:
+    xsize 400
+    padding (30, 10)
+    xalign 0.5

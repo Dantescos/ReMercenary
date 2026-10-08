@@ -196,7 +196,6 @@ init python:
                 self.mover(x, y)
                 return True
             return False
-
     # ========================================================
     # ARCHIMAGO
     # ========================================================
@@ -287,7 +286,6 @@ init python:
                 self.set_magia(self.get_magia() - 390)
                 return True
             return False
-
     # ========================================================
     # ARQUERO
     # ========================================================
@@ -354,7 +352,6 @@ init python:
                 d2 = objetivo.defenderse_recibir_danio(self.get_ataque_basico())
                 return d1 + d2
             return 0
-
     # ========================================================
     # LICH
     # ========================================================
@@ -408,7 +405,6 @@ init python:
             restauracion = int(self.get_magia_max() * 0.1) + 20
             self.set_magia(self.get_magia() + restauracion)
             return restauracion
-
     # ========================================================
     # CLERIGO
     # ========================================================
@@ -470,7 +466,6 @@ init python:
         def recuperacion_sagrada(self, cantidad):
             self.set_magia(self.get_magia() + cantidad)
             return self.get_magia()
-
     # ========================================================
     # GENERAL
     # ========================================================
@@ -517,7 +512,6 @@ init python:
                 self.set_energia(self.get_energia() - 1000)
                 return objetivo.defenderse_recibir_danio(100000)
             return 0
-
     # ========================================================
     # DRAGON
     # ========================================================
@@ -577,7 +571,6 @@ init python:
         def recuperacion_draconica(self, cantidad):
             self.set_magia(self.get_magia() + cantidad)
             return self.get_magia()
-
     # ========================================================
     # HEROES JUGABLES - STATS BALANCEADOS
     # ========================================================
@@ -591,7 +584,6 @@ init python:
             nuevo = int(aliado.get_ataque_basico() * 1.2)
             aliado.set_ataque_basico(nuevo)
             return nuevo
-
     class Lyra(Arquero):
         def __init__(self, x, y):
             super(Lyra, self).__init__("Lyra", 1200, 250, 90, 5, 4, 250, x, y, 0, True, 80, 40)
@@ -602,7 +594,6 @@ init python:
             danio = max(1, danio_base - defensa_objetivo)
             objetivo.defenderse_recibir_danio(danio)
             return danio
-
     class Gromm(Guerrero):
         def __init__(self, x, y):
             super(Gromm, self).__init__("Gromm", 3000, 200, 220, 3, 1, 200, x, y, 0, True)
@@ -610,7 +601,6 @@ init python:
         def escudo_levantado(self):
             self.set_defensa(self.get_defensa() * 2)
             return self.get_defensa()
-
     # ========================================================
     # SACERDOTISA (nueva ficha jugable/enemiga)
     # ========================================================
@@ -652,7 +642,6 @@ init python:
                 aliado.set_visible(True)
                 return True
             return False
-
     # ========================================================
     # DEMONIA (nueva ficha jugable/enemiga)
     # ========================================================
@@ -693,7 +682,6 @@ init python:
                 danio = int(self.get_ataque_especial() * 4.0)
                 return enemigo.defenderse_recibir_danio(danio)
             return 0
-
     # ========================================================
     # LICHA (nueva ficha jugable/enemiga)
     # ========================================================

@@ -121,11 +121,10 @@ init python:
         return enemigos
 
     def crear_enemigos_aleatorios(cantidad=8):
-        # FIX: ahora usa 3 filas [0, 1, 2] = 24 casillas disponibles
-        posiciones = [(x, y) for x in range(8) for y in [0, 1, 2]]
+        posiciones = [(x, y) for x in range(8) for y in [0, 1]]
         random.shuffle(posiciones)
         enemigos = []
-        tipos = ["Guerrero", "Mago", "ArchiMago", "Arquero", "Clerigo","Lich", "Licha", "Demonia", "Dragon", "General", "Sacerdotisa"]
+        tipos = ["Guerrero", "Mago", "Arquero", "Lich", "Dragon", "General", "Sacerdotisa", "Demonia", "Licha"]
         for i in range(min(cantidad, len(posiciones))):
             x, y = posiciones[i]
             tipo = random.choice(tipos)
@@ -133,24 +132,20 @@ init python:
                 enemigos.append(Guerrero("Guerrero", 150, 40, 20, 4, 1, 35, x, y, 0, True))
             elif tipo == "Mago":
                 enemigos.append(Mago("Mago", 200, 25, 15, 4, 3, 30, x, y, 0, True, 100, 100, 10, 10, 10))
-            elif tipo == "ArchiMago":
-                enemigos.append(ArchiMago("Archimago", 300, 35, 25, 3, 3, 50, x, y, 0, True, 1500, 100))
             elif tipo == "Arquero":
                 enemigos.append(Arquero("Arquero", 120, 25, 12, 4, 4, 30, x, y, 0, True, 30, 10))
-            elif tipo == "Clerigo":
-                enemigos.append(Clerigo("Clerigo", 150, 15, 18, 3, 2, 20, x, y, 0, True, 100))
             elif tipo == "Lich":
                 enemigos.append(Lich("Lich", 180, 28, 20, 3, 2, 45, x, y, 0, True, 200))
-            elif tipo == "Licha":
-                enemigos.append(Licha(x, y))
-            elif tipo == "Demonia":
-                enemigos.append(Demonia(x, y))
             elif tipo == "Dragon":
                 enemigos.append(Dragon("Dragon", 300, 60, 30, 2, 3, 70, x, y, 0, True, 500, 0, 0))
             elif tipo == "General":
                 enemigos.append(General("General", 250, 30, 20, 3, 2, 40, x, y, 0, True, 1000, 500))
             elif tipo == "Sacerdotisa":
                 enemigos.append(Sacerdotisa(x, y))
+            elif tipo == "Demonia":
+                enemigos.append(Demonia(x, y))
+            elif tipo == "Licha":
+                enemigos.append(Licha(x, y))
         return enemigos
 
 # ============================================================
@@ -162,7 +157,7 @@ label nivel1:
     $ boss_musica_activada = False
     $ boss_spawneado = False
     $ tablero_actual = "nivel1.png"   
-    call dialogo_nivel1_inicio from _call_dialogo_nivel1_inicio
+    call dialogo_nivel1_inicio
     $ enemigos = crear_enemigos_nivel1()
     $ nivel_actual = 1
     $ renpy.pause(0.2)
@@ -173,7 +168,7 @@ label nivel2:
     $ boss_musica_activada = False
     $ boss_spawneado = False
     $ tablero_actual = "nivel2.png"    
-    call dialogo_nivel2_inicio from _call_dialogo_nivel2_inicio
+    call dialogo_nivel2_inicio
     $ enemigos = crear_enemigos_nivel2()
     $ nivel_actual = 2
     $ renpy.pause(0.2)
@@ -184,7 +179,7 @@ label nivel3:
     $ boss_musica_activada = False
     $ boss_spawneado = False
     $ tablero_actual = "nivel3.png"    
-    call dialogo_nivel3_inicio from _call_dialogo_nivel3_inicio
+    call dialogo_nivel3_inicio
     $ enemigos = crear_enemigos_nivel3()
     $ nivel_actual = 3
     $ renpy.pause(0.2)
@@ -195,7 +190,7 @@ label nivel4:
     $ boss_musica_activada = False
     $ boss_spawneado = False
     $ tablero_actual = "nivel4.png"
-    call dialogo_nivel4_inicio from _call_dialogo_nivel4_inicio
+    call dialogo_nivel4_inicio
     $ enemigos = crear_enemigos_nivel4()
     $ nivel_actual = 4
     $ renpy.pause(0.2)
@@ -206,7 +201,7 @@ label nivel5:
     $ boss_musica_activada = False
     $ boss_spawneado = False
     $ tablero_actual = "nivel5.png"
-    call dialogo_nivel5_inicio from _call_dialogo_nivel5_inicio
+    call dialogo_nivel5_inicio
     $ enemigos = crear_enemigos_nivel5()
     $ nivel_actual = 5
     $ renpy.pause(0.2)
@@ -217,7 +212,7 @@ label nivel6:
     $ boss_musica_activada = False
     $ boss_spawneado = False
     $ tablero_actual = "nivel6.png"  
-    call dialogo_nivel6_inicio from _call_dialogo_nivel6_inicio
+    call dialogo_nivel6_inicio
     $ enemigos = crear_enemigos_nivel6()
     $ nivel_actual = 6
     $ renpy.pause(0.2)
@@ -229,20 +224,18 @@ label nivel7:
     $ boss_spawneado = False
     $ tablero_actual = "nivel7.png"
 
-    call dialogo_nivel7_inicio from _call_dialogo_nivel7_inicio
+    call dialogo_nivel7_inicio
     $ enemigos = crear_enemigos_nivel7()
     $ nivel_actual = 7
     $ renpy.pause(0.2)
     jump comenzar_batalla
 
 label nivel_aleatorio:
-    $ reproducir_musica("Lvl0.wav", fadein=1.0, loop=True)
+    $ reproducir_musica("Lvl1.wav", fadein=1.0, loop=True)
     $ boss_musica_activada = False
     $ boss_spawneado = False
-    $ tablero_actual = "nivel0.png"
     "¡Nivel aleatorio! ¡Preparate para sufrir!"
-    $ cantidad_aleatoria = random.randint(10, 20)
-    $ enemigos = crear_enemigos_aleatorios(cantidad_aleatoria)
+    $ enemigos = crear_enemigos_aleatorios(8)
     $ nivel_actual = 0
     $ renpy.pause(0.2)
     jump comenzar_batalla
