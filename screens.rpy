@@ -155,7 +155,6 @@ screen file_slots(title):
 
     tag menu
 
-
     text title:
         xalign 0.5
         ypos 20
@@ -352,7 +351,7 @@ screen creditos_animados():
             size 28
             color "#cccccc"
 
-        text "Nahuel Zanini":
+        text "Nahuel Villafañe":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -362,7 +361,7 @@ screen creditos_animados():
             size 28
             color "#cccccc"
         
-        text "Federico 'Fedelobo' ":
+        text "Federico 'Fedelobo'":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -377,13 +376,12 @@ screen creditos_animados():
             size 28
             color "#cccccc"
 
-        
         text "Pablo Laporta":
             xalign 0.5
             size 28
             color "#cccccc"
         
-        text "Fernando 'Master":
+        text "Fernando 'Master'":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -405,7 +403,7 @@ screen creditos_animados():
             size 28
             color "#cccccc"
 
-        text "Nahuel Zanini":
+        text "Nahuel Villafañe":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -415,7 +413,7 @@ screen creditos_animados():
             size 28
             color "#cccccc"
         
-        text "Federico 'Fedelobo' ":
+        text "Federico 'Fedelobo'":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -435,7 +433,7 @@ screen creditos_animados():
             size 28
             color "#cccccc"
         
-        text "Fernando 'Master":
+        text "Fernando 'Master'":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -457,7 +455,7 @@ screen creditos_animados():
             size 28
             color "#cccccc"
 
-        text "Nahuel Zanini":
+        text "Nahuel Villafañe":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -467,7 +465,7 @@ screen creditos_animados():
             size 28
             color "#cccccc"
         
-        text "Federico 'Fedelobo' ":
+        text "Federico 'Fedelobo'":
             xalign 0.5
             size 28
             color "#cccccc"
@@ -487,7 +485,7 @@ screen creditos_animados():
             size 28
             color "#cccccc"
         
-        text "Fernando 'Master' ":
+        text "Fernando 'Master'":
             xalign 0.5
             size 28
             color "#cccccc"

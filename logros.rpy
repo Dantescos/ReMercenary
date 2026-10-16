@@ -13,9 +13,9 @@ init python:
     LOGROS = {
         # Primeros pasos
         "primer_sangre":       ("Primera Sangre", "Mataste a tu primer enemigo"),
-        "primer_boss":         ("Cazador de Jefes", "Derrotaste a tu primer jefe"),
+        "primer_boss":         ("Cazador de Jefes", "Derrotaste al primer jefe"),
         "primer_nivel":        ("Superviviente", "Completaste el Nivel 1"),
-        "primer_heroe":        ("Héroe Legendario", "Usaste una habilidad especial por primera vez"),
+        "primer_heroe":        ("Heroe Legendario", "Usaste una habilidad especial por primera vez"),
 
         # Niveles completados
         "nivel_1":             ("Nivel 1 Completado", "Sobreviviste a La Invasion de los Goblins"),
@@ -24,7 +24,7 @@ init python:
         "nivel_4":             ("Nivel 4 Completado", "Profanaste el Templo de los Caidos"),
         "nivel_5":             ("Nivel 5 Completado", "Asaltaste la Fortaleza del General"),
         "nivel_6":             ("Nivel 6 Completado", "Descendiste al Abismo de los Condenados"),
-        "nivel_7":             ("Nivel 7 Completado", "Llegaste al Trono del Senor Oscuro"),
+        "nivel_7":             ("Nivel 7 Completado", "Llegaste al Trono de la Señora Oscura"),
         "todos_niveles":       ("Conquistador", "Completaste todos los niveles"),
 
         # Bosses
@@ -34,7 +34,7 @@ init python:
         "boss_4":              ("Purificador", "Derrotaste al General Caido"),
         "boss_5":              ("Rompe-Fortalezas", "Derrotaste al General Oscuro"),
         "boss_6":              ("Azote del Abismo", "Derrotaste al Archimago Oscuro"),
-        "boss_7":              ("Salvador de Veridia", "Derrotaste al Senor Oscuro"),
+        "boss_7":              ("Salvadora de Veridia", "Derrotaste a la Señora Oscura"),
         "todos_bosses":        ("Matadioses", "Derrotaste a TODOS los jefes del juego"),
 
         # Cantidad de enemigos
@@ -43,7 +43,7 @@ init python:
         "matar_50":            ("Guerrero", "Mataste 50 enemigos"),
         "matar_100":           ("Carnicero", "Mataste 100 enemigos"),
         "matar_200":           ("Devorador", "Mataste 200 enemigos"),
-        "matar_500":           ("Ángel de la Muerte", "Mataste 500 enemigos"),
+        "matar_500":           ("angel de la Muerte", "Mataste 500 enemigos"),
 
         # Habilidades
         "habilidad_5":         ("Tactico", "Usaste 5 habilidades especiales"),
@@ -56,14 +56,16 @@ init python:
         "rango_experto":       ("Experto", "Alcanzaste el rango Experto (1000 enemigos)"),
         "rango_leyenda":       ("Leyenda", "Alcanzaste el rango Leyenda (2000 enemigos)"),
 
-        # Finales
+        # Finales (Actualizados por cada variante)
         "final_bueno":         ("Final Bueno", "Kazuki se quedo en Veridia"),
-        "final_malo":          ("Final Malo", "Kazuki cayo en batalla"),
-        "final_isekai":        ("Regreso a Casa", "Kazuki desperto en el hospital"),
-        "final_overlord":      ("Overlord", "Kazuki se convirtio en el nuevo Senor Oscuro"),
+        "final_malo":          ("Final Malo", "Kazuki cayo en batalla contra la Señora Oscura"),
+        "final_agridulce":     ("Final Agridulce", "Kazuki se corrompio y reclamo el poder de la Señora Oscura"),
+        "final_isekai_1":      ("Regreso a Casa (I)", "Kazuki desperto en el hospital con el pendiente de Lyra"),
+        "final_isekai_2":      ("Regreso a Casa (II)", "Kazuki desperto en el hospital tras el accidente"),
+        "final_sacrificio":    ("El Sacrificio", "Kazuki dio su vida para proteger a Lyra"),
         "todos_finales":       ("Coleccionista de Finales", "Viste todos los finales del juego"),
 
-        # Desafíos
+        # Desafios
         "sin_morir_1":         ("Intocable", "Completaste un nivel sin perder ningun heroe"),
         "velocidad":           ("Flash", "Mataste a un jefe en 10 turnos o menos"),
         "ejercito_lleno":      ("General Supremo", "Desplegaste 8 unidades en un nivel"),

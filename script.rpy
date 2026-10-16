@@ -1,5 +1,5 @@
 ﻿# ============================================================
-# RE: MERCENARY - SCRIPT PRINCIPAL (VERSIÓN FINAL CORREGIDA)
+# RE: MERCENARY - SCRIPT PRINCIPAL (VERSION FINAL CORREGIDA)
 # ============================================================
 default turno_jugador = True
 default jugador_x = 0
@@ -981,7 +981,7 @@ label combate(heroe, enemigo):
                     else:
                         $ accion_realizada = True
                         "CASTIGO! [danio] de danio."
-                "Palabras de Fe - 100 magia (-40%% ATQ enemigo)":
+                "Palabras de Fe - 100 magia (-40% ATQ enemigo)":
                     $ resultado = heroe.palabras_de_fe(enemigo)
                     if resultado == False:
                         "No tienes suficiente magia!"
@@ -1036,7 +1036,7 @@ label combate(heroe, enemigo):
                     else:
                         $ accion_realizada = True
                         "DRENAJE! [danio] de danio. HP: [heroe.get_vida()]"
-                "Alas de Fuego - 300 magia (+30%% ATQ)":
+                "Alas de Fuego - 300 magia (+30% ATQ)":
                     $ resultado = heroe.alas_de_fuego()
                     if resultado == 0:
                         "No tienes suficiente magia!"
@@ -1081,7 +1081,7 @@ label combate(heroe, enemigo):
                     else:
                         $ accion_realizada = True
                         "Ataque! [danio] de danio."
-                "Toque Helado - 100 magia (-20%% ATQ enemigo)":
+                "Toque Helado - 100 magia (-20% ATQ enemigo)":
                     $ danio = heroe.toque_helado(enemigo)
                     if danio == 0:
                         "No tienes suficiente magia!"
@@ -1109,7 +1109,7 @@ label combate(heroe, enemigo):
                     else:
                         $ accion_realizada = True
                         "DRENAJE! [danio] de danio. HP: [heroe.get_vida()] | MAGIA: [heroe.get_magia()]"
-                "Maldicion - 300 magia (-50%% DEF enemigo)":
+                "Maldicion - 300 magia (-50% DEF enemigo)":
                     $ resultado = heroe.maldicion(enemigo)
                     if resultado == False:
                         "No tienes suficiente magia!"
@@ -1783,7 +1783,7 @@ label elegir_nivel:
             jump nivel5
         "Nivel 6 - EL ABISMO DE LOS CONDENADOS":
             jump nivel6
-        "Nivel 7 - EL TRONO DEL SENOR OSCURO":
+        "Nivel 7 - EL TRONO DE LA SEÑORA OSCURA":
             jump nivel7
         "Nivel Aleatorio":
             jump nivel_aleatorio
@@ -1962,9 +1962,10 @@ label victoria_jugador:
         call dialogo_nivel6_victoria from _call_dialogo_nivel6_victoria
     elif nivel_actual == 7:
         call dialogo_nivel7_victoria from _call_dialogo_nivel7_victoria
+        call eleccion_ataque_final_boss
         "HAS COMPLETADO EL JUEGO!"
         call screen creditos_animados
-        jump menu_principal
+        jump menu_principal        
     else:
         "Nivel completado!"
 
