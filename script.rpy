@@ -457,7 +457,7 @@ label combate(heroe, enemigo):
                     else:
                         $ accion_realizada = True
                         "WALDGOSE! [danio] de danio."
-                "Potenciar aliado (+20%% ATQ)":
+                "Potenciar aliado (+20%%%ATQ)":
                     $ heroe.potenciar_aliado(heroe)
                     $ accion_realizada = True
                     "Kazuki se potencia! ATQ: [heroe.get_ataque_basico()]"
@@ -981,7 +981,7 @@ label combate(heroe, enemigo):
                     else:
                         $ accion_realizada = True
                         "CASTIGO! [danio] de danio."
-                "Palabras de Fe - 100 magia (-40% ATQ enemigo)":
+                "Palabras de Fe - 100 magia (-40%%ATQ enemigo)":
                     $ resultado = heroe.palabras_de_fe(enemigo)
                     if resultado == False:
                         "No tienes suficiente magia!"
@@ -1036,7 +1036,7 @@ label combate(heroe, enemigo):
                     else:
                         $ accion_realizada = True
                         "DRENAJE! [danio] de danio. HP: [heroe.get_vida()]"
-                "Alas de Fuego - 300 magia (+30% ATQ)":
+                "Alas de Fuego - 300 magia (+30%%ATQ)":
                     $ resultado = heroe.alas_de_fuego()
                     if resultado == 0:
                         "No tienes suficiente magia!"
@@ -1081,7 +1081,7 @@ label combate(heroe, enemigo):
                     else:
                         $ accion_realizada = True
                         "Ataque! [danio] de danio."
-                "Toque Helado - 100 magia (-20% ATQ enemigo)":
+                "Toque Helado - 100 magia (-20%%ATQ enemigo)":
                     $ danio = heroe.toque_helado(enemigo)
                     if danio == 0:
                         "No tienes suficiente magia!"
@@ -1109,7 +1109,7 @@ label combate(heroe, enemigo):
                     else:
                         $ accion_realizada = True
                         "DRENAJE! [danio] de danio. HP: [heroe.get_vida()] | MAGIA: [heroe.get_magia()]"
-                "Maldicion - 300 magia (-50% DEF enemigo)":
+                "Maldicion - 300 magia (-50%%DEF enemigo)":
                     $ resultado = heroe.maldicion(enemigo)
                     if resultado == False:
                         "No tienes suficiente magia!"
