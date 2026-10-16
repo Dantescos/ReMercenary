@@ -1163,6 +1163,11 @@ label combate(heroe, enemigo):
 
         if not enemigo.esta_vivo():
             "[nombre_enemigo] HA SIDO DERROTADO!"
+            $ registrar_muerte_enemigo()
+            python:
+                if es_boss(enemigo.get_clase()):
+                    if nivel_actual >= 1 and nivel_actual <= 7:
+                        registrar_boss_matado(nivel_actual)
             $ enemigo.set_visible(False)
             return
 
@@ -1220,7 +1225,7 @@ label combate_versus(atacante, defensor):
 
 
 # ============================================================
-# MENU DE HABILIDAD PARA VERSUS (CON HP VISIBLE - SIN ERRORES)
+# MENU DE HABILIDAD PARA VERSUS (CON HP VISIBLE)
 # ============================================================
 label menu_habilidad_versus(unidad, objetivo):
     $ clase_u = unidad.get_clase()
@@ -1943,10 +1948,11 @@ label comenzar_batalla:
         $ renpy.full_restart()
 
 # ============================================================
-# VICTORIA
+# VICTORIA 
 # ============================================================
 label victoria_jugador:
     $ guardar_partida("partida")
+    $ registrar_nivel_completado(nivel_actual) 
 
     if nivel_actual == 1:
         call dialogo_nivel1_victoria from _call_dialogo_nivel1_victoria
@@ -1961,14 +1967,13 @@ label victoria_jugador:
     elif nivel_actual == 6:
         call dialogo_nivel6_victoria from _call_dialogo_nivel6_victoria
     elif nivel_actual == 7:
-        call dialogo_nivel7_victoria from _call_dialogo_nivel7_victoria
-        call eleccion_ataque_final_boss
-        "HAS COMPLETADO EL JUEGO!"
-        call screen creditos_animados
-        jump menu_principal        
+        # Level 7 va directo al dialogo final, que a su vez lleva a la eleccion
+        # (usa jump porque el dialogo NO retorna, encadena con el final)
+        jump dialogo_nivel7_victoria
     else:
         "Nivel completado!"
 
+    # Este bloque SOLO se ejecuta para niveles 1 a 6
     if nivel_actual >= 1 and nivel_actual <= 6:
         $ siguiente = nivel_actual + 1
         menu:
@@ -2271,4 +2276,5 @@ label inicio:
 # LABEL MENU PRINCIPAL
 # ============================================================
 label menu_principal:
+    $ renpy.pause(1.5, hard=False)
     $ renpy.full_restart()

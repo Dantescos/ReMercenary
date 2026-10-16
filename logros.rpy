@@ -1,5 +1,5 @@
 # ============================================================
-# logros.rpy - Sistema de logros y rangos
+# logros.rpy - Sistema de logros (CORREGIDO FINAL)
 # ============================================================
 
 default enemigos_muertos_total = 0
@@ -7,7 +7,12 @@ default rango_actual = "Novato"
 default habilidades_usadas = 0
 default bosses_matados = 0
 default niveles_completados = 0
-default logros_desbloqueados = {}
+
+init python:
+    if persistent.logros_desbloqueados is None:
+        persistent.logros_desbloqueados = {}
+    if persistent.finales_vistos is None:
+        persistent.finales_vistos = []
 
 init python:
     LOGROS = {
@@ -56,7 +61,7 @@ init python:
         "rango_experto":       ("Experto", "Alcanzaste el rango Experto (1000 enemigos)"),
         "rango_leyenda":       ("Leyenda", "Alcanzaste el rango Leyenda (2000 enemigos)"),
 
-        # Finales (Actualizados por cada variante)
+        # Finales
         "final_bueno":         ("Final Bueno", "Kazuki se quedo en Veridia"),
         "final_malo":          ("Final Malo", "Kazuki cayo en batalla contra la Señora Oscura"),
         "final_agridulce":     ("Final Agridulce", "Kazuki se corrompio y reclamo el poder de la Señora Oscura"),
@@ -72,19 +77,37 @@ init python:
         "todos_heroes":        ("Los Tres Mosqueteros", "Ganaste con Kazuki, Lyra y Gromm"),
     }
 
+    FINALES_DISPONIBLES = [
+        "final_bueno",
+        "final_malo",
+        "final_agridulce",
+        "final_isekai_1",
+        "final_isekai_2",
+        "final_sacrificio",
+    ]
+
     def desbloquear_logro(nombre):
-        if nombre not in store.logros_desbloqueados:
-            store.logros_desbloqueados[nombre] = True
+        if nombre not in persistent.logros_desbloqueados:
+            persistent.logros_desbloqueados[nombre] = True
             if nombre in LOGROS:
                 titulo, descripcion = LOGROS[nombre]
-                renpy.notify("LOGRO: " + titulo)
+                store.logro_reciente_titulo = titulo
+                store.logro_reciente_desc = descripcion
+                renpy.show_screen("popup_logro", titulo=titulo, descripcion=descripcion)
+                renpy.restart_interaction()
 
     def logro_esta_desbloqueado(nombre):
-        return nombre in store.logros_desbloqueados
+        return nombre in persistent.logros_desbloqueados
+
+    def registrar_final_visto(nombre_final):
+        desbloquear_logro(nombre_final)
+        if nombre_final not in persistent.finales_vistos:
+            persistent.finales_vistos.append(nombre_final)
+        if len(persistent.finales_vistos) >= len(FINALES_DISPONIBLES):
+            desbloquear_logro("todos_finales")
 
     def registrar_muerte_enemigo():
         store.enemigos_muertos_total += 1
-        # Logros por cantidad
         if store.enemigos_muertos_total == 1:
             desbloquear_logro("primer_sangre")
         if store.enemigos_muertos_total == 10:
@@ -152,13 +175,81 @@ init python:
             store.rango_actual = nuevo_rango
             renpy.notify("¡Nuevo rango alcanzado: " + nuevo_rango + "!")
 
+    def obtener_lista_logros():
+        """Devuelve lista de tuplas (titulo, descripcion, desbloqueado) ordenada."""
+        resultado = []
+        for clave in sorted(LOGROS.keys()):
+            titulo, descripcion = LOGROS[clave]
+            desbloqueado = clave in persistent.logros_desbloqueados
+            resultado.append((titulo, descripcion, desbloqueado))
+        return resultado
+
 
 # ============================================================
-# SCREEN: PANTALLA DE LOGROS
+# POPUP DE LOGRO DESBLOQUEADO
+# ============================================================
+default logro_reciente_titulo = ""
+default logro_reciente_desc = ""
+
+screen popup_logro(titulo, descripcion):
+    zorder 200
+    modal False
+
+    frame:
+        xalign 0.5
+        yalign 0.0
+        yoffset 40
+        padding (30, 20)
+        background "#000000ee"
+        at popup_logro_anim
+
+        hbox:
+            spacing 20
+            text "🏆":
+                size 60
+                color "#ffcc00"
+                yalign 0.5
+            vbox:
+                spacing 4
+                text "¡LOGRO DESBLOQUEADO!":
+                    size 22
+                    color "#ffcc00"
+                    bold True
+                text titulo:
+                    size 30
+                    color "#ffffff"
+                    bold True
+                text descripcion:
+                    size 20
+                    color "#cccccc"
+
+    timer 4.0 action Hide("popup_logro")
+
+
+transform popup_logro_anim:
+    alpha 0.0
+    yoffset -100
+    ease 0.4 alpha 1.0 yoffset 40
+    pause 3.0
+    ease 0.5 alpha 0.0
+
+
+# ============================================================
+# SCREEN: PANTALLA DE LOGROS (SIN SCROLL, SIN HUECOS)
+# Usa grid 4x11 con lista precalculada — garantiza render
 # ============================================================
 screen pantalla_logros():
     modal True
     tag menu
+
+    # Precalcular lista completa (titulo, desc, desbloqueado) ordenada
+    $ lista_logros = obtener_lista_logros()
+    $ total_logros = len(lista_logros)
+    $ total_obt = 0
+    python:
+        for (t, d, obt) in lista_logros:
+            if obt:
+                total_obt += 1
 
     frame:
         xfill True
@@ -168,42 +259,59 @@ screen pantalla_logros():
     vbox:
         xalign 0.5
         yalign 0.5
-        spacing 10
+        spacing 8
 
-        text "LOGROS" size 60 color "#ffcc00" bold True xalign 0.5
-        text "Desbloqueados: [len(logros_desbloqueados)] / [len(LOGROS)]" size 30 color "#ffffff" xalign 0.5
-        null height 20
+        text "LOGROS":
+            size 42
+            color "#ffcc00"
+            bold True
+            xalign 0.5
 
-        viewport:
-            xsize 1600
-            ysize 800
-            scrollbars "vertical"
-            mousewheel True
+        text ("Obtenidos: " + str(total_obt) + " / " + str(total_logros)):
+            size 20
+            color "#cccccc"
+            xalign 0.5
 
-            vbox:
-                spacing 8
-                for clave in sorted(LOGROS.keys()):
-                    $ titulo, descripcion = LOGROS[clave]
-                    $ desbloqueado = logro_esta_desbloqueado(clave)
-                    $ color_fondo = "#1a1a2a" if desbloqueado else "#0a0a12"
-                    $ color_titulo = "#ffffff" if desbloqueado else "#555555"
-                    $ color_desc = "#aaaaaa" if desbloqueado else "#333333"
-                    $ icono = "✓" if desbloqueado else "·"
-                    $ color_icono = "#00ff00" if desbloqueado else "#333333"
+        null height 6
 
-                    frame:
-                        xsize 1500
-                        background color_fondo
-                        padding (15, 10)
-                        hbox:
-                            spacing 15
-                            text "[icono]" size 30 color color_icono
-                            vbox:
-                                text titulo size 25 color color_titulo bold True
-                                text descripcion size 18 color color_desc
+        grid 4 11:
+            spacing 4
+            xalign 0.5
 
-        null height 15
+            for (titulo, descripcion, desbloqueado) in lista_logros:
+
+                frame:
+                    xsize 420
+                    ysize 72
+                    background ("#1a3a1a" if desbloqueado else "#0a0a0a")
+                    padding (10, 6)
+
+                    vbox:
+                        spacing 2
+
+                        if desbloqueado:
+                            text "✓ OBTENIDO":
+                                size 12
+                                color "#ffcc00"
+                                bold True
+                        else:
+                            text "✗ BLOQUEADO":
+                                size 12
+                                color "#555555"
+                                bold True
+
+                        text titulo:
+                            size 16
+                            color ("#ffffff" if desbloqueado else "#444444")
+                            bold True
+
+                        text descripcion:
+                            size 12
+                            color ("#aaffaa" if desbloqueado else "#333333")
+
+        null height 6
+
         textbutton "Cerrar":
             action Return()
-            text_size 30
+            text_size 26
             xalign 0.5

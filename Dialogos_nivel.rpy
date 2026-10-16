@@ -349,6 +349,9 @@ label dialogo_nivel7_inicio:
     hide senora_oscura
     return
 
+# ============================================================
+# NIVEL 7 - VICTORIA 
+# ============================================================
 label dialogo_nivel7_victoria:
     scene black
     show kazuki at left
@@ -358,24 +361,8 @@ label dialogo_nivel7_victoria:
     "La Señora Oscura, ahora una anciana debil, yace en el suelo."
     senora_oscura "Lo lograron... al fin... alguien pudo detenerme..."
     kazuki "¿Por que? ¿Por que hiciste todo esto?"
-    senora_oscura "Porque... yo era una diosa. Tenia poder sobre todo... todo y ustedes....me...lo..quitaron."
-    "La Señora Oscura exhala su ultimo aliento. El Imperio Oscuro ha caido...por....ahora."
-    "Pero no hay tiempo para celebrar. Veridia esta en ruinas."
-    kazuki "Lo logramos. Pero... ¿a que costo?"
-    lyra   "Veridia sobrevivira. Los reinos siempre lo hacen."
-    kazuki "¿Y nosotros?"
-    lyra   "¿Nosotros? Depende de ti, Kazuki."
-    gromm  "Niña, dejalo respirar. Acaba de salvar el mundo."
-    lyra   "Solo digo que..."
-    kazuki "Lo se. Lo se."
-    "Lyra lo mira con una sonrisa."
-    lyra   "¿Te vas a quedar, Kazuki? ¿O vas a volver a tu mundo?"
-    kazuki "..."
-    menu:
-        "Me quedo, quiero estar con ustedes":
-            jump final_bueno
-        "Me largo de este lugar":
-            jump final_isekai_1
-        "Quiero volver a mi casa!":
-            jump final_isekai_2
-    return
+    senora_oscura "Porque... yo era una diosa. Tenia poder sobre todo... todo y ustedes... me... lo... quitaron."
+    senora_oscura "Preparensen para morir... DOOM!"
+    "La Señora Oscura lanza su ultimo ataque final devastador."
+
+    jump eleccion_ataque_final_boss
