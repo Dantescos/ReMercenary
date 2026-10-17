@@ -72,8 +72,8 @@ screen game_menu(title=None, scroll=None, yinitial=0.0):
 
     if menu_pausa_activo:
         imagebutton:
-            idle "continuar_idle.png"
-            hover "continuar_hover.png"
+            idle "coninuar_idle.png"
+            hover "coninuar_hover.png"
             focus_mask True
             action Return()
 
@@ -224,14 +224,55 @@ screen file_slots(title):
 
 screen choice(items):
     style_prefix "choice"
+    zorder 20
 
-    vbox:
-        xalign 0.5
-        yalign 0.5
-        spacing 10
+    if combate_versus_activo:
+        frame:
+            xalign 0.5
+            yalign 1.0
+            xsize 1640
+            ysize 270
+            padding (14, 10)
+            background "#101722F2"
+            hbox:
+                spacing 16
+                for columna in range(2):
+                    vbox:
+                        spacing 5
+                        for i in range(len(items)):
+                            if i % 2 == columna:
+                                button:
+                                    xsize 790
+                                    ysize 44
+                                    padding (10, 3)
+                                    background Frame(Solid("#202E40"), 8, 8)
+                                    hover_background Frame(Solid("#385879"), 8, 8)
+                                    action items[i].action
+                                    hbox:
+                                        spacing 12
+                                        yalign 0.5
+                                        frame:
+                                            xsize 34
+                                            ysize 34
+                                            background Frame(Solid("#D5A94F"), 8, 8)
+                                            text icono_accion_menu(items[i].caption):
+                                                xalign 0.5
+                                                yalign 0.5
+                                                size 23
+                                                bold True
+                                                color "#182536"
+                                        text items[i].caption:
+                                            yalign 0.5
+                                            size 20
+                                            color "#F3F6FB"
+    else:
+        vbox:
+            xalign 0.5
+            yalign 0.5
+            spacing 10
 
-        for i in items:
-            textbutton i.caption action i.action
+            for i in items:
+                textbutton i.caption action i.action
 
 
 style choice_vbox is vbox
@@ -245,15 +286,18 @@ style choice_vbox:
 
 style choice_button:
     xalign 0.5
-    padding (40, 12)
-    background "#1a1a2ecc"
-    hover_background "#4a4a8acc"
+    xminimum 720
+    padding (32, 16)
+    background Frame(Solid("#182536EE"), 12, 12)
+    hover_background Frame(Solid("#315579F5"), 12, 12)
+    insensitive_background Frame(Solid("#18253688"), 12, 12)
 
 style choice_button_text:
     xalign 0.5
-    size 28
-    color "#ffffff"
-    hover_color "#ffff88"
+    size 26
+    color "#F3F6FB"
+    hover_color "#FFE19A"
+    outlines [(2, "#101722", 0, 0)]
 
 default menu_pausa_activo = True
 
@@ -265,8 +309,8 @@ screen pause_menu():
 
     if menu_pausa_activo:
         imagebutton:
-            idle "continuar_idle.png"
-            hover "continuar_hover.png"
+            idle "coninuar_idle.png"
+            hover "coninuar_hover.png"
             focus_mask True
             action Return()
 

@@ -1,9 +1,14 @@
-# ============================================================
+﻿# ============================================================
 # Personajes.rpy 
 # ============================================================
 
 init python:
     import random
+
+    ESCALA_ESTADISTICAS = 10
+
+    def reducir_estadistica(valor):
+        return max(0, int(round(float(valor) / ESCALA_ESTADISTICAS)))
 
     # ========================================================
     # CLASE BASE
@@ -11,13 +16,13 @@ init python:
     class FichaBase:
         def __init__(self, clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible=True):
             self._clase = clase
-            self._vida = vida
-            self._vida_max = vida
-            self._ataque = ataque
-            self._defensa = defensa
+            self._vida = reducir_estadistica(vida)
+            self._vida_max = self._vida
+            self._ataque = reducir_estadistica(ataque)
+            self._defensa = reducir_estadistica(defensa)
             self._punto_mov = punto_mov
             self._rango = rango
-            self._danio = danio
+            self._danio = reducir_estadistica(danio)
             self._x = x
             self._y = y
             self._cooldown = cooldown
@@ -47,11 +52,15 @@ init python:
         def get_energia(self): return self._energia
 
         def set_clase(self, v): self._clase = v
-        def set_vida(self, v): self._vida = max(0, v)
-        def set_vida_max(self, v): self._vida_max = v
+        def set_vida(self, v): self._vida = max(0, min(int(v), self._vida_max))
+        def set_vida_max(self, v):
+            self._vida_max = max(1, int(v))
+            self._vida = min(self._vida, self._vida_max)
         def set_ataque_basico(self, v): self._ataque = v
         def set_ataque_especial(self, v): self._danio = v
-        def set_defensa(self, v): self._defensa = v
+        # Los aumentos temporales no pueden volver invulnerable a una ficha
+        # al acumularse repetidamente.
+        def set_defensa(self, v): self._defensa = max(0, min(int(v), 30))
         def set_rango(self, v): self._rango = v
         def set_puntos_mov(self, v): self._punto_mov = v
         def set_x(self, v): self._x = v
@@ -81,7 +90,12 @@ init python:
 
         def defenderse_recibir_danio(self, danio_recibido):
             defensa = self.get_defensa() if hasattr(self, 'get_defensa') else 0
-            danio_final = max(1, int(danio_recibido - (defensa * 0.5)))
+            mitigado = max(1, int(danio_recibido - (defensa * 0.5)))
+            # Evita que un crítico o una habilidad especial elimine una ficha
+            # de un golpe. Los ataques de varios impactos aplican el límite
+            # por impacto, y el daño nunca supera el HP que quedaba.
+            limite_impacto = max(1, int(self._vida_max * 0.35))
+            danio_final = min(mitigado, limite_impacto, self._vida)
             self._vida = max(0, self._vida - danio_final)
             return danio_final
 
@@ -110,7 +124,7 @@ init python:
             return self.get_defensa()
 
         def arremeter(self):
-            self.set_ataque_basico(self.get_ataque_basico() + 20)
+            self.set_ataque_basico(self.get_ataque_basico() + reducir_estadistica(20))
             return self.get_ataque_basico()
 
     # ========================================================
@@ -119,66 +133,66 @@ init python:
     class Mago(FichaBase):
         def __init__(self, clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible, magia, magia_max=0, cantidad_fuego=10, cantidad_carambano=10, cantidad_castigo=10):
             super(Mago, self).__init__(clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible)
-            self.set_magia_max(max(magia, magia_max))
-            self.set_magia(magia)
+            self.set_magia_max(reducir_estadistica(max(magia, magia_max)))
+            self.set_magia(reducir_estadistica(magia))
             self.__cantidad_fuego = cantidad_fuego
             self.__cantidad_carambano = cantidad_carambano
             self.__cantidad_castigo = cantidad_castigo
 
         def ataque_basico(self, objetivo=None):
-            if self.get_magia() >= 100:
-                self.set_magia(self.get_magia() - 100)
+            if self.get_magia() >= reducir_estadistica(100):
+                self.set_magia(self.get_magia() - reducir_estadistica(100))
                 if objetivo is not None:
                     return objetivo.defenderse_recibir_danio(self.get_ataque_basico())
                 return self.get_ataque_basico()
             else:
-                self.set_magia(self.get_magia() + 50)
+                self.set_magia(self.get_magia() + reducir_estadistica(50))
                 return 0
 
         def bola_fuego_mejorada(self, objetivo):
-            if self.get_magia() >= 200 and self.__cantidad_fuego > 0:
-                self.set_magia(self.get_magia() - 200)
+            if self.get_magia() >= reducir_estadistica(200) and self.__cantidad_fuego > 0:
+                self.set_magia(self.get_magia() - reducir_estadistica(200))
                 self.__cantidad_fuego -= 1
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_basico() * 1.5))
             return 0
 
         def ataque_hielo_infernal(self, objetivo):
-            if self.get_magia() >= 100 and self.__cantidad_carambano > 0:
-                self.set_magia(self.get_magia() - 100)
+            if self.get_magia() >= reducir_estadistica(100) and self.__cantidad_carambano > 0:
+                self.set_magia(self.get_magia() - reducir_estadistica(100))
                 self.__cantidad_carambano -= 1
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_basico() * 1.2))
             return 0
 
         def ataque_castigo_divino(self, objetivo):
-            if self.get_magia() >= 300 and self.__cantidad_castigo > 0:
-                self.set_magia(self.get_magia() - 300)
+            if self.get_magia() >= reducir_estadistica(300) and self.__cantidad_castigo > 0:
+                self.set_magia(self.get_magia() - reducir_estadistica(300))
                 self.__cantidad_castigo -= 1
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_basico() * 2))
             return 0
 
         def vientos_infernales_prohibidos(self, objetivo):
-            if self.get_magia() >= 500:
-                self.set_magia(self.get_magia() - 500)
+            if self.get_magia() >= reducir_estadistica(500):
+                self.set_magia(self.get_magia() - reducir_estadistica(500))
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_especial() * 1.5))
             return 0
 
         def ataque_magico_prohibido(self, objetivo):
-            if self.get_magia() >= 1000:
-                self.set_magia(self.get_magia() - 1000)
-                return objetivo.defenderse_recibir_danio(100000)
+            if self.get_magia() >= reducir_estadistica(1000):
+                self.set_magia(self.get_magia() - reducir_estadistica(1000))
+                return objetivo.defenderse_recibir_danio(reducir_estadistica(100000))
             return 0
 
         def proteccion_magica(self):
-            if self.get_magia() >= 290:
-                self.set_magia(self.get_magia() - 290)
+            if self.get_magia() >= reducir_estadistica(290):
+                self.set_magia(self.get_magia() - reducir_estadistica(290))
                 self.set_defensa(self.get_defensa() * 2)
                 return self.get_defensa()
             return 0
 
         def curacion_magica(self):
-            if self.get_vida() < self.get_vida_max() and self.get_magia() >= 290:
-                self.set_magia(self.get_magia() - 290)
-                curacion = 100
+            if self.get_vida() < self.get_vida_max() and self.get_magia() >= reducir_estadistica(290):
+                self.set_magia(self.get_magia() - reducir_estadistica(290))
+                curacion = reducir_estadistica(100)
                 self.set_vida(self.get_vida() + curacion)
                 return curacion
             return 0
@@ -191,8 +205,8 @@ init python:
             return self.get_magia()
 
         def magia_de_vuelo(self, x, y):
-            if self.get_magia() >= 150:
-                self.set_magia(self.get_magia() - 150)
+            if self.get_magia() >= reducir_estadistica(150):
+                self.set_magia(self.get_magia() - reducir_estadistica(150))
                 self.mover(x, y)
                 return True
             return False
@@ -202,24 +216,24 @@ init python:
     class ArchiMago(FichaBase):
         def __init__(self, clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible, magia, ataque_final=0):
             super(ArchiMago, self).__init__(clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible)
-            self.set_magia_max(magia)
-            self.set_magia(magia)
+            self.set_magia_max(reducir_estadistica(magia))
+            self.set_magia(reducir_estadistica(magia))
             self.__ataque_final = ataque_final
 
         def ataque_basico(self, objetivo=None):
-            if self.get_magia() >= 100:
-                self.set_magia(self.get_magia() - 100)
+            if self.get_magia() >= reducir_estadistica(100):
+                self.set_magia(self.get_magia() - reducir_estadistica(100))
                 if objetivo is not None:
                     return objetivo.defenderse_recibir_danio(self.get_ataque_basico())
                 return self.get_ataque_basico()
             else:
-                self.set_magia(self.get_magia() + 50)
+                self.set_magia(self.get_magia() + reducir_estadistica(50))
                 return 0
 
         def curacion_magica(self):
-            if self.get_vida() < self.get_vida_max() and self.get_magia() >= 290:
-                self.set_magia(self.get_magia() - 290)
-                curacion = 150
+            if self.get_vida() < self.get_vida_max() and self.get_magia() >= reducir_estadistica(290):
+                self.set_magia(self.get_magia() - reducir_estadistica(290))
+                curacion = reducir_estadistica(150)
                 self.set_vida(self.get_vida() + curacion)
                 return curacion
             return 0
@@ -229,61 +243,61 @@ init python:
             return self.get_magia()
 
         def magia_de_vuelo(self, x, y):
-            if self.get_magia() >= 200:
-                self.set_magia(self.get_magia() - 200)
+            if self.get_magia() >= reducir_estadistica(200):
+                self.set_magia(self.get_magia() - reducir_estadistica(200))
                 self.mover(x, y)
                 return True
             return False
 
         def ataque_especial(self, objetivo):
-            if self.get_magia() >= 300:
-                self.set_magia(self.get_magia() - 300)
+            if self.get_magia() >= reducir_estadistica(300):
+                self.set_magia(self.get_magia() - reducir_estadistica(300))
                 return objetivo.defenderse_recibir_danio(self.get_ataque_especial())
             return 0
 
         def ataque_gelido(self, objetivo):
-            if self.get_magia() >= 259:
-                self.set_magia(self.get_magia() - 259)
+            if self.get_magia() >= reducir_estadistica(259):
+                self.set_magia(self.get_magia() - reducir_estadistica(259))
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_especial() * 1.2))
             return 0
 
         def ataque_oscuro(self, objetivo):
-            if self.get_magia() >= 360:
-                self.set_magia(self.get_magia() - 360)
+            if self.get_magia() >= reducir_estadistica(360):
+                self.set_magia(self.get_magia() - reducir_estadistica(360))
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_especial() * 1.3))
             return 0
 
         def ataque_espadas_magicas_de_luz(self, objetivo):
-            if self.get_magia() >= 500:
-                self.set_magia(self.get_magia() - 500)
+            if self.get_magia() >= reducir_estadistica(500):
+                self.set_magia(self.get_magia() - reducir_estadistica(500))
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_especial() * 1.5))
             return 0
 
         def ataque_magico_relampago(self, objetivo):
-            if self.get_magia() >= 365:
-                self.set_magia(self.get_magia() - 365)
+            if self.get_magia() >= reducir_estadistica(365):
+                self.set_magia(self.get_magia() - reducir_estadistica(365))
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_especial() * 1.4))
             return 0
 
         def ataque_final(self, objetivo):
-            if self.get_magia() >= 1000:
-                self.set_magia(self.get_magia() - 1000)
-                return objetivo.defenderse_recibir_danio(100000)
+            if self.get_magia() >= reducir_estadistica(1000):
+                self.set_magia(self.get_magia() - reducir_estadistica(1000))
+                return objetivo.defenderse_recibir_danio(reducir_estadistica(100000))
             return 0
 
         def sabiduria_ancestral(self):
-            self.set_magia(self.get_magia() + 300)
+            self.set_magia(self.get_magia() + reducir_estadistica(300))
             return self.get_magia()
 
         def detener_el_tiempo(self):
-            if self.get_magia() >= 800:
-                self.set_magia(self.get_magia() - 800)
+            if self.get_magia() >= reducir_estadistica(800):
+                self.set_magia(self.get_magia() - reducir_estadistica(800))
                 return True
             return False
 
         def ilusion_de_archimago(self, x, y):
-            if self.get_magia() >= 390:
-                self.set_magia(self.get_magia() - 390)
+            if self.get_magia() >= reducir_estadistica(390):
+                self.set_magia(self.get_magia() - reducir_estadistica(390))
                 return True
             return False
     # ========================================================
@@ -358,51 +372,51 @@ init python:
     class Lich(FichaBase):
         def __init__(self, clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible, magia):
             super(Lich, self).__init__(clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible)
-            self.set_magia_max(magia)
-            self.set_magia(magia)
+            self.set_magia_max(reducir_estadistica(magia))
+            self.set_magia(reducir_estadistica(magia))
 
         def ataque_basico(self, objetivo=None):
-            if self.get_magia() >= 100:
-                self.set_magia(self.get_magia() - 100)
+            if self.get_magia() >= reducir_estadistica(100):
+                self.set_magia(self.get_magia() - reducir_estadistica(100))
                 if objetivo is not None:
                     return objetivo.defenderse_recibir_danio(self.get_ataque_basico())
                 return self.get_ataque_basico()
             else:
-                self.set_magia(self.get_magia() + 50)
+                self.set_magia(self.get_magia() + reducir_estadistica(50))
                 return 0
 
         def ataque_espectral(self, objetivo):
-            if self.get_magia() >= 50:
-                self.set_magia(self.get_magia() - 50)
+            if self.get_magia() >= reducir_estadistica(50):
+                self.set_magia(self.get_magia() - reducir_estadistica(50))
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_basico() * 1.3))
             return 0
 
         def drenar_vida(self, objetivo):
-            if self.get_magia() >= 30:
-                self.set_magia(self.get_magia() - 30)
-                danio = objetivo.defenderse_recibir_danio(self.get_ataque_basico() + 10)
+            if self.get_magia() >= reducir_estadistica(30):
+                self.set_magia(self.get_magia() - reducir_estadistica(30))
+                danio = objetivo.defenderse_recibir_danio(self.get_ataque_basico() + reducir_estadistica(10))
                 robo = int(danio * 0.5)
                 self.set_vida(self.get_vida() + robo)
                 return danio
             return 0
 
         def ataque_masivo(self, objetivo):
-            if self.get_magia() >= 100:
+            if self.get_magia() >= reducir_estadistica(100):
                 danio_base = int(self.get_magia() * 1.5) + self.get_ataque_basico()
                 self.set_magia(0)
                 return objetivo.defenderse_recibir_danio(danio_base)
             return 0
 
         def curar(self):
-            if self.get_magia() >= 40:
-                self.set_magia(self.get_magia() - 40)
-                curacion = int(self.get_vida_max() * 0.15) + 20
+            if self.get_magia() >= reducir_estadistica(40):
+                self.set_magia(self.get_magia() - reducir_estadistica(40))
+                curacion = int(self.get_vida_max() * 0.15) + reducir_estadistica(20)
                 self.set_vida(self.get_vida() + curacion)
                 return curacion
             return 0
 
         def regenerar_magia(self):
-            restauracion = int(self.get_magia_max() * 0.1) + 20
+            restauracion = int(self.get_magia_max() * 0.1) + reducir_estadistica(20)
             self.set_magia(self.get_magia() + restauracion)
             return restauracion
     # ========================================================
@@ -411,56 +425,56 @@ init python:
     class Clerigo(FichaBase):
         def __init__(self, clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible, magia):
             super(Clerigo, self).__init__(clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible)
-            self.set_magia_max(magia)
-            self.set_magia(magia)
+            self.set_magia_max(reducir_estadistica(magia))
+            self.set_magia(reducir_estadistica(magia))
 
         def ataque_basico(self, objetivo=None):
-            if self.get_magia() >= 100:
-                self.set_magia(self.get_magia() - 100)
+            if self.get_magia() >= reducir_estadistica(100):
+                self.set_magia(self.get_magia() - reducir_estadistica(100))
                 if objetivo is not None:
                     return objetivo.defenderse_recibir_danio(self.get_ataque_basico())
                 return self.get_ataque_basico()
             else:
-                self.set_magia(self.get_magia() + 50)
+                self.set_magia(self.get_magia() + reducir_estadistica(50))
                 return 0
 
         def sanacion_grupal(self, aliado):
-            if self.get_magia() >= 200:
-                self.set_magia(self.get_magia() - 200)
-                aliado.set_vida(aliado.get_vida() + 80)
-                return 80
+            if self.get_magia() >= reducir_estadistica(200):
+                self.set_magia(self.get_magia() - reducir_estadistica(200))
+                aliado.set_vida(aliado.get_vida() + reducir_estadistica(80))
+                return reducir_estadistica(80)
             return 0
 
         def palabras_de_fe(self, enemigo):
-            if self.get_magia() >= 100:
-                self.set_magia(self.get_magia() - 100)
+            if self.get_magia() >= reducir_estadistica(100):
+                self.set_magia(self.get_magia() - reducir_estadistica(100))
                 enemigo.set_ataque_basico(int(enemigo.get_ataque_basico() * 0.6))
                 return True
             return False
 
         def luz_cegadora_dia(self, enemigo):
-            if self.get_magia() >= 300:
-                self.set_magia(self.get_magia() - 300)
+            if self.get_magia() >= reducir_estadistica(300):
+                self.set_magia(self.get_magia() - reducir_estadistica(300))
                 return enemigo.defenderse_recibir_danio(int(self.get_ataque_especial() * 2.5))
             return 0
 
         def exorcismo(self, enemigo):
-            if self.get_magia() >= 400:
-                self.set_magia(self.get_magia() - 400)
+            if self.get_magia() >= reducir_estadistica(400):
+                self.set_magia(self.get_magia() - reducir_estadistica(400))
                 return enemigo.defenderse_recibir_danio(int(self.get_ataque_especial() * 3.5))
             return 0
 
         def escudo_de_fe_magico(self):
-            if self.get_magia() >= 200:
-                self.set_magia(self.get_magia() - 200)
-                self.set_defensa(self.get_defensa() + 1000)
+            if self.get_magia() >= reducir_estadistica(200):
+                self.set_magia(self.get_magia() - reducir_estadistica(200))
+                self.set_defensa(self.get_defensa() + reducir_estadistica(1000))
                 return self.get_defensa()
             return 0
 
         def mi_fe_es_inquebrantable(self, objetivo):
-            if self.get_magia() >= 1000:
-                self.set_magia(self.get_magia() - 1000)
-                return objetivo.defenderse_recibir_danio(10000)
+            if self.get_magia() >= reducir_estadistica(1000):
+                self.set_magia(self.get_magia() - reducir_estadistica(1000))
+                return objetivo.defenderse_recibir_danio(reducir_estadistica(10000))
             return 0
 
         def recuperacion_sagrada(self, cantidad):
@@ -472,7 +486,7 @@ init python:
     class General(FichaBase):
         def __init__(self, clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible, energia, ataque_final=0):
             super(General, self).__init__(clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible)
-            self.set_energia(energia)
+            self.set_energia(reducir_estadistica(energia))
             self.__ataque_final = ataque_final
 
         def ataque_basico(self, objetivo=None):
@@ -481,22 +495,22 @@ init python:
             return self.get_ataque_basico()
 
         def espada(self, objetivo):
-            if self.get_energia() >= 100:
-                self.set_energia(self.get_energia() - 100)
+            if self.get_energia() >= reducir_estadistica(100):
+                self.set_energia(self.get_energia() - reducir_estadistica(100))
                 return objetivo.defenderse_recibir_danio(self.get_ataque_basico())
             else:
-                self.set_energia(self.get_energia() + 200)
+                self.set_energia(self.get_energia() + reducir_estadistica(200))
                 return 0
 
         def canon_de_mano(self, objetivo):
-            if self.get_energia() >= 250:
-                self.set_energia(self.get_energia() - 250)
+            if self.get_energia() >= reducir_estadistica(250):
+                self.set_energia(self.get_energia() - reducir_estadistica(250))
                 return objetivo.defenderse_recibir_danio(self.get_ataque_especial())
             return 0
 
         def tiro_doble(self, objetivo):
-            if self.get_energia() >= 350:
-                self.set_energia(self.get_energia() - 350)
+            if self.get_energia() >= reducir_estadistica(350):
+                self.set_energia(self.get_energia() - reducir_estadistica(350))
                 d1 = objetivo.defenderse_recibir_danio(self.get_ataque_basico())
                 d2 = objetivo.defenderse_recibir_danio(self.get_ataque_basico())
                 return d1 + d2
@@ -508,9 +522,9 @@ init python:
             return objetivo.defenderse_recibir_danio(self.get_ataque_basico())
 
         def canion_especial_final(self, objetivo):
-            if self.get_energia() >= 1000:
-                self.set_energia(self.get_energia() - 1000)
-                return objetivo.defenderse_recibir_danio(100000)
+            if self.get_energia() >= reducir_estadistica(1000):
+                self.set_energia(self.get_energia() - reducir_estadistica(1000))
+                return objetivo.defenderse_recibir_danio(reducir_estadistica(100000))
             return 0
     # ========================================================
     # DRAGON
@@ -518,8 +532,8 @@ init python:
     class Dragon(FichaBase):
         def __init__(self, clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible, magia, espinas=0, escamas_activas=0):
             super(Dragon, self).__init__(clase, vida, ataque, defensa, punto_mov, rango, danio, x, y, cooldown, visible)
-            self.set_magia_max(magia)
-            self.set_magia(magia)
+            self.set_magia_max(reducir_estadistica(magia))
+            self.set_magia(reducir_estadistica(magia))
             self.__espinas = espinas
             self.__escamas_activas = escamas_activas
 
@@ -529,36 +543,36 @@ init python:
         def set_escamas_activas(self, v): self.__escamas_activas = v
 
         def ataque_basico(self, objetivo=None):
-            if self.get_magia() >= 100:
-                self.set_magia(self.get_magia() - 100)
+            if self.get_magia() >= reducir_estadistica(100):
+                self.set_magia(self.get_magia() - reducir_estadistica(100))
                 if objetivo is not None:
                     return objetivo.defenderse_recibir_danio(self.get_ataque_basico())
                 return self.get_ataque_basico()
             else:
-                self.set_magia(self.get_magia() + 50)
+                self.set_magia(self.get_magia() + reducir_estadistica(50))
                 return 0
 
         def ataque_llamarada_infernal(self, objetivo):
-            if self.get_magia() >= 200:
-                self.set_magia(self.get_magia() - 200)
+            if self.get_magia() >= reducir_estadistica(200):
+                self.set_magia(self.get_magia() - reducir_estadistica(200))
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_especial() * 2.0))
             return 0
 
         def ataque_espinas(self, objetivo):
-            if self.get_magia() >= 100:
-                self.set_magia(self.get_magia() - 100)
+            if self.get_magia() >= reducir_estadistica(100):
+                self.set_magia(self.get_magia() - reducir_estadistica(100))
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_especial() * 1.5))
             return 0
 
         def ataque_luz(self, objetivo):
-            if self.get_magia() >= 150:
-                self.set_magia(self.get_magia() - 150)
+            if self.get_magia() >= reducir_estadistica(150):
+                self.set_magia(self.get_magia() - reducir_estadistica(150))
                 return objetivo.defenderse_recibir_danio(int(self.get_ataque_especial() * 2.2))
             return 0
 
         def escamas_reflectantes(self):
-            if self.get_magia() >= 30:
-                self.set_magia(self.get_magia() - 30)
+            if self.get_magia() >= reducir_estadistica(30):
+                self.set_magia(self.get_magia() - reducir_estadistica(30))
                 self.__escamas_activas = 2
                 return True
             return False
@@ -589,11 +603,8 @@ init python:
             super(Lyra, self).__init__("Lyra", 1200, 250, 90, 5, 4, 250, x, y, 0, True, 80, 40)
 
         def flecha_perforante(self, objetivo):
-            danio_base = self.get_ataque_basico() + 10
-            defensa_objetivo = int(objetivo.get_defensa() * 0.5)
-            danio = max(1, danio_base - defensa_objetivo)
-            objetivo.defenderse_recibir_danio(danio)
-            return danio
+            danio_base = self.get_ataque_basico() + reducir_estadistica(10)
+            return objetivo.defenderse_recibir_danio(danio_base)
     class Gromm(Guerrero):
         def __init__(self, x, y):
             super(Gromm, self).__init__("Gromm", 3000, 200, 220, 3, 1, 200, x, y, 0, True)
@@ -609,35 +620,34 @@ init python:
             super(Sacerdotisa, self).__init__("Sacerdotisa", 1400, 160, 130, 3, 3, 200, x, y, 0, True, 2500)
 
         def bendicion_divina(self, aliados):
-            if self.get_magia() >= 350:
-                self.set_magia(self.get_magia() - 350)
+            if self.get_magia() >= reducir_estadistica(350):
+                self.set_magia(self.get_magia() - reducir_estadistica(350))
                 curados = 0
                 for a in aliados:
                     if a.get_visible() and a.esta_vivo() and a.get_vida() < a.get_vida_max():
-                        a.set_vida(a.get_vida() + 120)
+                        a.set_vida(a.get_vida() + reducir_estadistica(120))
                         curados += 1
-                self.set_vida(self.get_vida() + 120)
+                self.set_vida(self.get_vida() + reducir_estadistica(120))
                 return curados
             return 0
 
         def escudo_sagrado(self, aliado):
-            if self.get_magia() >= 250:
-                self.set_magia(self.get_magia() - 250)
+            if self.get_magia() >= reducir_estadistica(250):
+                self.set_magia(self.get_magia() - reducir_estadistica(250))
                 aliado.set_defensa(aliado.get_defensa() + 500)
                 return aliado.get_defensa()
             return 0
 
         def castigo_celestial(self, enemigo):
-            if self.get_magia() >= 500:
-                self.set_magia(self.get_magia() - 500)
+            if self.get_magia() >= reducir_estadistica(500):
+                self.set_magia(self.get_magia() - reducir_estadistica(500))
                 danio = int(self.get_ataque_especial() * 2.0)
-                enemigo.set_vida(enemigo.get_vida() - danio)
-                return danio
+                return enemigo.defenderse_recibir_danio(danio)
             return 0
 
         def resurreccion(self, aliado):
-            if self.get_magia() >= 1000 and not aliado.esta_vivo():
-                self.set_magia(self.get_magia() - 1000)
+            if self.get_magia() >= reducir_estadistica(1000) and not aliado.esta_vivo():
+                self.set_magia(self.get_magia() - reducir_estadistica(1000))
                 aliado.set_vida(int(aliado.get_vida_max() * 0.5))
                 aliado.set_visible(True)
                 return True
@@ -650,17 +660,16 @@ init python:
             super(Demonia, self).__init__("Demonia", 2200, 240, 110, 4, 2, 280, x, y, 0, True, 1800, 0, 0)
 
         def latigazo_infernal(self, enemigo):
-            if self.get_magia() >= 200:
-                self.set_magia(self.get_magia() - 200)
+            if self.get_magia() >= reducir_estadistica(200):
+                self.set_magia(self.get_magia() - reducir_estadistica(200))
                 danio = int(self.get_ataque_especial() * 1.8)
-                enemigo.set_vida(enemigo.get_vida() - danio)
-                enemigo.set_vida(max(0, enemigo.get_vida() - 30))
-                return danio + 30
+                danio += reducir_estadistica(30)
+                return enemigo.defenderse_recibir_danio(danio)
             return 0
 
         def beso_drenante(self, enemigo):
-            if self.get_magia() >= 150:
-                self.set_magia(self.get_magia() - 150)
+            if self.get_magia() >= reducir_estadistica(150):
+                self.set_magia(self.get_magia() - reducir_estadistica(150))
                 danio = enemigo.defenderse_recibir_danio(int(self.get_ataque_basico() * 1.3))
                 robo = int(danio * 0.7)
                 self.set_vida(self.get_vida() + robo)
@@ -668,16 +677,16 @@ init python:
             return 0
 
         def alas_de_fuego(self):
-            if self.get_magia() >= 300:
-                self.set_magia(self.get_magia() - 300)
+            if self.get_magia() >= reducir_estadistica(300):
+                self.set_magia(self.get_magia() - reducir_estadistica(300))
                 self.set_ataque_basico(int(self.get_ataque_basico() * 1.3))
                 self.set_puntos_mov(self.get_puntos_mov() + 1)
                 return self.get_ataque_basico()
             return 0
 
         def explosion_infernal(self, enemigo):
-            if self.get_vida() > 500:
-                coste = 400
+            if self.get_vida() > reducir_estadistica(500):
+                coste = reducir_estadistica(400)
                 self.set_vida(self.get_vida() - coste)
                 danio = int(self.get_ataque_especial() * 4.0)
                 return enemigo.defenderse_recibir_danio(danio)
@@ -694,40 +703,40 @@ init python:
             return self.__invocaciones
 
         def toque_helado(self, enemigo):
-            if self.get_magia() >= 100:
-                self.set_magia(self.get_magia() - 100)
+            if self.get_magia() >= reducir_estadistica(100):
+                self.set_magia(self.get_magia() - reducir_estadistica(100))
                 danio = enemigo.defenderse_recibir_danio(int(self.get_ataque_basico() * 1.4))
                 enemigo.set_ataque_basico(int(enemigo.get_ataque_basico() * 0.8))
                 return danio
             return 0
 
         def miasma_necrotico(self, enemigo):
-            if self.get_magia() >= 400:
-                self.set_magia(self.get_magia() - 400)
+            if self.get_magia() >= reducir_estadistica(400):
+                self.set_magia(self.get_magia() - reducir_estadistica(400))
                 danio = int(self.get_ataque_especial() * 2.5)
                 return enemigo.defenderse_recibir_danio(danio)
             return 0
 
         def invocar_esqueleto(self):
-            if self.__invocaciones > 0 and self.get_magia() >= 250:
+            if self.__invocaciones > 0 and self.get_magia() >= reducir_estadistica(250):
                 self.__invocaciones -= 1
-                self.set_magia(self.get_magia() - 250)
+                self.set_magia(self.get_magia() - reducir_estadistica(250))
                 return True
             return False
 
         def drenaje_masivo(self, enemigo):
-            if self.get_magia() >= 200:
-                self.set_magia(self.get_magia() - 200)
+            if self.get_magia() >= reducir_estadistica(200):
+                self.set_magia(self.get_magia() - reducir_estadistica(200))
                 danio = enemigo.defenderse_recibir_danio(int(self.get_ataque_basico() * 1.8))
                 robo_vida = int(danio * 0.6)
                 self.set_vida(self.get_vida() + robo_vida)
-                self.set_magia(self.get_magia() + 100)
+                self.set_magia(self.get_magia() + reducir_estadistica(100))
                 return danio
             return 0
 
         def maldicion(self, enemigo):
-            if self.get_magia() >= 300:
-                self.set_magia(self.get_magia() - 300)
+            if self.get_magia() >= reducir_estadistica(300):
+                self.set_magia(self.get_magia() - reducir_estadistica(300))
                 enemigo.set_defensa(int(enemigo.get_defensa() * 0.5))
                 return True
             return False

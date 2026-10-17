@@ -34,7 +34,12 @@ init python:
                     return imagen
 
         imagenes_comunes = {
+            "Kazuki": "Kazuki.png",
+            "Lyra": "Lyra.png",
+            "Gromm": "Gromm.png",
             "Dragon": "Dragon.png",
+            # Licha debe ir antes que Lich: el nombre "Licha" contiene "Lich".
+            "Licha": "Licha.png",
             "Lich": "Lich.png",
             "Archimago": "Archimago.png",
             "Mago": "Mago.png",
@@ -44,7 +49,7 @@ init python:
             "Arquero": "Arquero.png",
             "Sacerdotisa": "Sacerdotisa.png",
             "Demonia": "Demonia.png",
-            "Licha": "Licha.png",
+            "Morgana": "Mago.png",
         }
         for tipo, imagen in imagenes_comunes.items():
             if tipo in clase:
@@ -52,30 +57,97 @@ init python:
 
         return "default.png"
 
+    def obtener_imagen_retrato(clase):
+        return "images/" + obtener_imagen_enemigo(clase)
+
+    # Los nombres de sprites de combate no son uniformes en todos los archivos.
+    # Resolverlos de forma segura evita errores de archivo inexistente.
+    def obtener_sprite_combate(clase, accion="idle"):
+        import os
+        import renpy
+
+        base = obtener_imagen_enemigo(clase)
+        nombre = base[:-4] if base.lower().endswith(".png") else base
+        # El retrato del Dragon usa "Dragon.png", pero sus poses se guardaron
+        # con el nombre femenino "dragona". Mapearlo evita mostrar el retrato
+        # estático durante todo el combate.
+        aliases_sprites = {
+            "Dragon": "dragona",
+        }
+        for tipo, alias in aliases_sprites.items():
+            if tipo in clase:
+                nombre = alias
+                break
+        sufijos = {
+            "idle": ["_idle", ""],
+            "ataque": ["_ataque", "_ataca", "_ataue", "_dile", ""],
+            "dano": ["_recibe_dano", "_redibe_dano", "_recibe_ataque", "_dano", ""],
+        }
+        # Sprites propios de personajes de la historia.
+        especiales = {
+            "Kazuki": {"ataque": "Kazuki_ataca.png", "dano": "Kazuki_redibe_dano.png"},
+            "Gromm": {"ataque": "Gromm_ataca.png"},
+            "Lyra": {},
+        }
+        carpeta = os.path.join(renpy.config.gamedir, "images")
+        candidatos = []
+        if clase in especiales and accion in especiales[clase]:
+            candidatos.append(especiales[clase][accion])
+        candidatos.extend(nombre + sufijo + ".png" for sufijo in sufijos.get(accion, [""]))
+        for archivo in candidatos:
+            ruta = os.path.join(carpeta, archivo)
+            if os.path.isfile(ruta):
+                return "images/" + archivo
+        return "images/" + base
+
+    def fraccion_vida(personaje):
+        maxima = max(1, personaje.get_vida_max())
+        return max(0.0, min(1.0, float(personaje.get_vida()) / maxima))
+
+    def fraccion_magia(personaje):
+        maxima = max(1, personaje.get_magia_max())
+        return max(0.0, min(1.0, float(personaje.get_magia()) / maxima))
+
+    def formato_recurso_combate(valor):
+        valor = int(valor)
+        if valor >= 1000:
+            miles = valor / 1000.0
+            return ("%.1fk" % miles).replace(".0k", "k")
+        return str(valor)
+
+    def restaurar_recursos_combate(*personajes):
+        for personaje in personajes:
+            if personaje is None or not personaje.esta_vivo():
+                continue
+            personaje.set_vida(personaje.get_vida_max())
+            maxima_magia = personaje.get_magia_max()
+            if maxima_magia > 0:
+                personaje.set_magia(maxima_magia)
+
     # ========================================================
     # PROGRESION DE JEFES
     # ========================================================
 
     def crear_boss_nivel1(x, y):
-        return Guerrero("Ogro", 1500, 60, 40, 3, 1, 75, x, y, 0, True)
+        return Guerrero("Ogro", 1500, 160, 40, 3, 1, 200, x, y, 0, True)
 
     def crear_boss_nivel2(x, y):
-        return Mago("Esqueleto", 2500, 80, 55, 3, 2, 100, x, y, 0, True, 800, 800, 15, 15, 15)
+        return Mago("Esqueleto", 2200, 180, 55, 3, 2, 250, x, y, 0, True, 800, 800, 15, 15, 15)
 
     def crear_boss_nivel3(x, y):
-        return Guerrero("Traidor", 4000, 100, 75, 3, 1, 135, x, y, 0, True)
+        return Guerrero("Traidor", 3200, 200, 75, 3, 1, 300, x, y, 0, True)
 
     def crear_boss_nivel4(x, y):
-        return General("Caballero Corrompido", 6000, 125, 95, 3, 1, 170, x, y, 0, True, 2500, 1200)
+        return General("Caballero Corrompido", 4200, 220, 95, 3, 1, 340, x, y, 0, True, 2500, 1200)
 
     def crear_boss_nivel5(x, y):
-        return ArchiMago("Senor Oscuro Humano", 8000, 150, 115, 3, 3, 205, x, y, 0, True, 3000, 1000)
+        return ArchiMago("Senor Oscuro Humano", 5400, 240, 115, 3, 3, 410, x, y, 0, True, 3000, 1000)
 
     def crear_boss_nivel6(x, y):
-        return Dragon("Senor Oscuro Demonio", 11000, 175, 140, 3, 3, 245, x, y, 0, True, 4000, 0, 0)
+        return Dragon("Senor Oscuro Demonio", 7000, 260, 140, 3, 3, 490, x, y, 0, True, 4000, 0, 0)
 
     def crear_boss_nivel7(x, y):
-        return Dragon("Senor Oscuro Tentaculos", 16000, 205, 165, 4, 4, 290, x, y, 0, True, 6000, 0, 0)
+        return Dragon("Senor Oscuro Tentaculos", 8500, 280, 165, 4, 4, 580, x, y, 0, True, 6000, 0, 0)
 
     def crear_boss_por_nivel(nivel, x, y):
         if nivel == 1:
@@ -102,8 +174,6 @@ init python:
             crear_boss_nivel2,
             crear_boss_nivel3,
             crear_boss_nivel4,
-            crear_boss_nivel5,
-            crear_boss_nivel6,
-            crear_boss_nivel7,]
+            crear_boss_nivel5,]
         funcion_elegida = random.choice(opciones)
         return funcion_elegida(x, y)

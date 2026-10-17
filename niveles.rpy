@@ -5,6 +5,44 @@
 init python:
     import random
 
+    def equilibrar_enemigos_nivel(enemigos, nivel):
+        """Aplica una curva común y conserva diferencias por arquetipo."""
+        nivel = max(1, min(7, int(nivel)))
+        vida_base = 30 + (nivel - 1) * 13
+        ataque_base = 16 + (nivel - 1) * 2
+        defensa_base = 3 + (nivel - 1)
+
+        for enemigo in enemigos:
+            if isinstance(enemigo, Demonia):
+                vida_mult, ataque_mult, defensa_mult = 1.10, 1.15, 1.0
+            elif isinstance(enemigo, Dragon):
+                vida_mult, ataque_mult, defensa_mult = 1.30, 1.20, 1.15
+            elif isinstance(enemigo, General):
+                vida_mult, ataque_mult, defensa_mult = 1.15, 1.05, 1.25
+            elif isinstance(enemigo, Guerrero):
+                vida_mult, ataque_mult, defensa_mult = 1.15, 1.0, 1.20
+            elif isinstance(enemigo, Arquero):
+                vida_mult, ataque_mult, defensa_mult = 0.80, 1.0, 0.75
+            elif isinstance(enemigo, (ArchiMago, Mago)):
+                vida_mult, ataque_mult, defensa_mult = 0.85, 1.05, 0.80
+            elif isinstance(enemigo, Lich):
+                vida_mult, ataque_mult, defensa_mult = 0.90, 1.10, 0.90
+            elif isinstance(enemigo, Clerigo):
+                vida_mult, ataque_mult, defensa_mult = 0.95, 0.90, 1.0
+            else:
+                vida_mult, ataque_mult, defensa_mult = 1.0, 1.0, 1.0
+
+            vida = max(1, int(round(vida_base * vida_mult)))
+            ataque = max(1, int(round(ataque_base * ataque_mult)))
+            defensa = max(0, int(round(defensa_base * defensa_mult)))
+            enemigo.set_vida_max(vida)
+            enemigo.set_vida(vida)
+            enemigo.set_ataque_basico(ataque)
+            enemigo.set_defensa(defensa)
+            enemigo.set_ataque_especial(max(1, int(round(ataque * 1.25))))
+
+        return enemigos
+
     def crear_enemigos_nivel1():
         enemigos = [
             Guerrero("Goblin", 50, 10, 5, 3, 1, 15, 2, 0, 0, True),
@@ -17,7 +55,7 @@ init python:
             x, y = posiciones.pop()
             enemigo.set_x(x)
             enemigo.set_y(y)
-        return enemigos
+        return equilibrar_enemigos_nivel(enemigos, 1)
 
     def crear_enemigos_nivel2():
         enemigos = [
@@ -33,7 +71,7 @@ init python:
             x, y = posiciones.pop()
             enemigo.set_x(x)
             enemigo.set_y(y)
-        return enemigos
+        return equilibrar_enemigos_nivel(enemigos, 2)
 
     def crear_enemigos_nivel3():
         enemigos = [
@@ -49,7 +87,7 @@ init python:
             x, y = posiciones.pop()
             enemigo.set_x(x)
             enemigo.set_y(y)
-        return enemigos
+        return equilibrar_enemigos_nivel(enemigos, 3)
 
     def crear_enemigos_nivel4():
         enemigos = [
@@ -65,7 +103,7 @@ init python:
             x, y = posiciones.pop()
             enemigo.set_x(x)
             enemigo.set_y(y)
-        return enemigos
+        return equilibrar_enemigos_nivel(enemigos, 4)
 
     def crear_enemigos_nivel5():
         enemigos = [
@@ -82,7 +120,7 @@ init python:
             x, y = posiciones.pop()
             enemigo.set_x(x)
             enemigo.set_y(y)
-        return enemigos
+        return equilibrar_enemigos_nivel(enemigos, 5)
 
     def crear_enemigos_nivel6():
         enemigos = [
@@ -99,7 +137,7 @@ init python:
             x, y = posiciones.pop()
             enemigo.set_x(x)
             enemigo.set_y(y)
-        return enemigos
+        return equilibrar_enemigos_nivel(enemigos, 6)
 
     def crear_enemigos_nivel7():
         enemigos = [
@@ -118,7 +156,7 @@ init python:
             x, y = posiciones.pop()
             enemigo.set_x(x)
             enemigo.set_y(y)
-        return enemigos
+        return equilibrar_enemigos_nivel(enemigos, 7)
 
     def crear_enemigos_aleatorios(cantidad=8):
         # FIX: ahora usa 3 filas [0, 1, 2] = 24 casillas disponibles
@@ -151,7 +189,7 @@ init python:
                 enemigos.append(General("General", 250, 30, 20, 3, 2, 40, x, y, 0, True, 1000, 500))
             elif tipo == "Sacerdotisa":
                 enemigos.append(Sacerdotisa(x, y))
-        return enemigos
+        return equilibrar_enemigos_nivel(enemigos, 2)
 
 # ============================================================
 # LABELS DE NIVELES
