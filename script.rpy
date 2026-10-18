@@ -38,6 +38,29 @@ default combate_versus_terminado = False
 default combate_historia_huida = False
 default enemigos_moviendo = False
 default enemigos_pendientes = []
+default codigo_secreto = ""
+default minijuego_activo = False
+default goku_x = 340
+default goku_y = 540
+default goku_vida = 100
+default goku_poder = 0
+default goku_cargando = False
+default goku_accion = "idle"
+default goku_frame = 0
+default goku_facing = 1
+default goku_accion_ticks = 0
+default freezer_x = 1540
+default freezer_y = 540
+default freezer_vida = 100
+default freezer_accion = "idle"
+default freezer_frame = 0
+default freezer_facing = -1
+default freezer_cooldown = 0.0
+default mini_proyectil_activo = False
+default mini_proyectil_x = 0
+default mini_proyectil_y = 0
+default mini_proyectil_direccion = 1
+default mini_resultado = ""
 default tipos_unidades_ejercito = ["Mago", "General", "Archimago", "Guerrero", "Dragon", "Arquero", "Clerigo", "Lich", "Sacerdotisa", "Demonia", "Licha"]
 default tipos_unidades_versus = ["Mago", "Guerrero", "Arquero", "Dragon", "Sacerdotisa", "Demonia", "Licha"]
 
@@ -125,6 +148,156 @@ init python:
     def aplicar_danio_magico(atacante, defensor, multiplicador):
         danio = int(atacante.get_ataque_basico() * multiplicador)
         return defensor.defenderse_recibir_danio(danio)
+
+    MINIJUEGO_FRAME_SECUENCIAS = {
+        "goku": {
+            "punch": (0, 1, 2, 3, 4), "charge": (8,), "blast": (2, 3, 4),
+            "right": (0, 1, 2), "left": (0, 2, 3, 4),
+            "up": (2, 3, 4), "down": (0, 1, 2, 3, 4),
+        },
+        "freezer": {
+            "punch": (0, 1, 2, 3), "charge": (10,), "blast": (1, 2, 3),
+            "right": (0, 1, 3, 4), "left": (0, 1, 4),
+            "up": (0, 1, 2, 3, 4, 5), "down": (0, 1, 2, 3, 4),
+        },
+    }
+    MINIJUEGO_CANTIDAD_FRAMES = dict(
+        (personaje, dict((accion, len(frames)) for accion, frames in acciones.items()))
+        for personaje, acciones in MINIJUEGO_FRAME_SECUENCIAS.items()
+    )
+
+    def imagen_minijuego(personaje, accion, frame):
+        if accion == "idle":
+            accion, frame = "punch", 0
+        secuencia = MINIJUEGO_FRAME_SECUENCIAS.get(personaje, {}).get(accion, (0,))
+        frame = secuencia[int(frame) % len(secuencia)]
+        if accion == "blast":
+            frame = MINIJUEGO_FRAME_SECUENCIAS[personaje]["punch"][frame]
+            accion = "punch"
+        return "images/minijuego/%s_%s_%02d.png" % (personaje, accion, frame)
+
+    def iniciar_minijuego_gkssj():
+        store.minijuego_activo = True
+        store.goku_x, store.goku_y, store.goku_vida, store.goku_poder = 340, 540, 100, 0
+        store.goku_cargando = False
+        store.goku_accion, store.goku_frame, store.goku_facing = "idle", 0, 1
+        store.goku_accion_ticks = 0
+        store.freezer_x, store.freezer_y, store.freezer_vida = 1540, 540, 100
+        store.freezer_accion, store.freezer_frame, store.freezer_facing = "idle", 0, -1
+        store.freezer_cooldown = 0.0
+        store.mini_proyectil_activo = False
+        store.mini_resultado = ""
+
+    def minijuego_mover_goku(dx, dy, accion):
+        if not store.minijuego_activo or store.goku_cargando:
+            return
+        store.goku_x = max(130, min(1790, store.goku_x + dx))
+        store.goku_y = max(335, min(820, store.goku_y + dy))
+        if dx:
+            store.goku_facing = 1 if dx > 0 else -1
+        store.goku_accion, store.goku_frame = accion, 0
+        store.goku_accion_ticks = 5
+
+    def minijuego_toggle_carga():
+        if not store.minijuego_activo:
+            return
+        store.goku_cargando = not store.goku_cargando
+        if store.goku_cargando:
+            store.goku_accion, store.goku_frame = "charge", 0
+        elif store.goku_accion == "charge":
+            store.goku_accion, store.goku_frame = "idle", 0
+
+    def minijuego_golpear():
+        if not store.minijuego_activo or store.goku_cargando:
+            return
+        store.goku_accion, store.goku_frame = "punch", 0
+        store.goku_accion_ticks = 5
+        cerca = abs(store.goku_x - store.freezer_x) <= 145 and abs(store.goku_y - store.freezer_y) <= 105
+        frente = (store.freezer_x - store.goku_x) * store.goku_facing >= 0
+        if cerca and frente:
+            store.freezer_vida = max(0, store.freezer_vida - 18)
+            store.mini_resultado = "¡Golpe!"
+            minijuego_revisar_fin()
+        else:
+            store.mini_resultado = "Acércate a Freezer para golpear."
+
+    def minijuego_disparar():
+        if not store.minijuego_activo or store.goku_cargando:
+            return
+        if store.goku_poder < 15:
+            store.mini_resultado = "Carga poder con X antes de disparar."
+            return
+        store.goku_poder -= 15
+        store.goku_accion, store.goku_frame = "blast", 0
+        store.goku_accion_ticks = 5
+        store.mini_proyectil_direccion = store.goku_facing
+        store.mini_proyectil_x = store.goku_x + 95 * store.goku_facing
+        store.mini_proyectil_y = store.goku_y
+        store.mini_proyectil_activo = True
+        store.mini_resultado = "¡Kamehameha!"
+
+    def minijuego_revisar_fin():
+        if store.freezer_vida <= 0:
+            store.minijuego_activo = False
+            store.mini_resultado = "¡Goku ganó!"
+        elif store.goku_vida <= 0:
+            store.minijuego_activo = False
+            store.mini_resultado = "Freezer ganó."
+
+    def minijuego_tick():
+        if not store.minijuego_activo:
+            return
+
+        if store.goku_cargando:
+            store.goku_poder = min(100, store.goku_poder + 2)
+            store.goku_accion = "charge"
+
+        if store.goku_accion != "idle":
+            total = MINIJUEGO_CANTIDAD_FRAMES["goku"].get(store.goku_accion, 1)
+            store.goku_frame = (store.goku_frame + 1) % total
+            if store.goku_accion_ticks > 0:
+                store.goku_accion_ticks -= 1
+            elif not store.goku_cargando:
+                store.goku_accion, store.goku_frame = "idle", 0
+
+        freezer_total = MINIJUEGO_CANTIDAD_FRAMES["freezer"].get(store.freezer_accion, 1)
+        store.freezer_frame = (store.freezer_frame + 1) % freezer_total
+
+        if store.mini_proyectil_activo:
+            store.mini_proyectil_x += 38 * store.mini_proyectil_direccion
+            if abs(store.mini_proyectil_x - store.freezer_x) < 85 and abs(store.mini_proyectil_y - store.freezer_y) < 125:
+                store.freezer_vida = max(0, store.freezer_vida - 24)
+                store.mini_proyectil_activo = False
+                minijuego_revisar_fin()
+            elif not 0 <= store.mini_proyectil_x <= 1920:
+                store.mini_proyectil_activo = False
+
+    def minijuego_freezer_tick():
+        if not store.minijuego_activo:
+            return
+        store.freezer_cooldown = max(0.0, store.freezer_cooldown - 0.35)
+        dx, dy = store.goku_x - store.freezer_x, store.goku_y - store.freezer_y
+        if abs(dx) <= 150 and abs(dy) <= 115:
+            if store.freezer_accion != "punch":
+                store.freezer_accion, store.freezer_frame = "punch", 0
+            if store.freezer_cooldown == 0:
+                store.goku_vida = max(0, store.goku_vida - 8)
+                store.freezer_cooldown = 1.4
+                store.mini_resultado = "Freezer te golpeó."
+                minijuego_revisar_fin()
+            return
+        if dx:
+            step_x = min(34, abs(dx)) * (1 if dx > 0 else -1)
+            store.freezer_x += step_x
+            store.freezer_facing = 1 if step_x > 0 else -1
+        if abs(dy) > 36:
+            store.freezer_y += min(30, abs(dy) - 36) * (1 if dy > 0 else -1)
+        if abs(dx) > abs(dy):
+            nueva_accion = "right" if dx > 0 else "left"
+        else:
+            nueva_accion = "down" if dy > 0 else "up"
+        if store.freezer_accion != nueva_accion:
+            store.freezer_accion, store.freezer_frame = nueva_accion, 0
 
 # ============================================================
 # MOVIMIENTO DE ENEMIGOS
@@ -2715,13 +2888,22 @@ screen seleccion_heroes():
 # SPLASHSCREEN
 # ============================================================
 label splashscreen:
-    scene black
-    with Pause(0.5)
+    scene expression Solid("#ffffff")
+    show expression "images/sanca_logo.jpg" as splash_logo:
+        xalign 0.5
+        yalign 0.5
+    with dissolve
+    $ renpy.pause(2.5, hard=True)
     return
 
 # ============================================================
 # LABEL START
 # ============================================================
+label minijuego_gkssj:
+    $ iniciar_minijuego_gkssj()
+    call screen minijuego_gkssj
+    return
+
 label start:
     jump inicio
 

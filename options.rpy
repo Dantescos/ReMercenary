@@ -188,6 +188,17 @@ init python:
     build.classify('**/#**', None)
     build.classify('**/thumbs.db', None)
 
+    # Fuerza la inclusion de musica, tambien las pistas guardadas en la raiz
+    # del directorio game y no solo las que estan dentro de audio/.
+    build.classify('game/audio/**.mp3', 'archive')
+    build.classify('game/audio/**.wav', 'archive')
+    build.classify('game/audio/**.ogg', 'archive')
+    build.classify('game/audio/**.opus', 'archive')
+    build.classify('game/*.mp3', 'archive')
+    build.classify('game/*.wav', 'archive')
+    build.classify('game/*.ogg', 'archive')
+    build.classify('game/*.opus', 'archive')
+
     ## Para archivar, se clasifican como 'archive'.
 
     # build.classify('game/**.png', 'archive')

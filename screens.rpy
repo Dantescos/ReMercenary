@@ -63,6 +63,193 @@ screen main_menu():
                     xalign 0.5
                     text_size 30
 
+    frame:
+        xalign 0.985
+        yalign 0.985
+        background "#080A12E8"
+        padding (18, 14)
+        vbox:
+            spacing 8
+            text "Código secreto":
+                size 20
+                color "#FFFFFF"
+            input value VariableInputValue("codigo_secreto") length 5:
+                xsize 280
+                size 24
+            if codigo_secreto.lower() == "gkssj":
+                textbutton "Jugar Goku vs Freezer":
+                    action Start("minijuego_gkssj")
+                    text_size 20
+            else:
+                textbutton "Activar código":
+                    action Function(renpy.notify, "Escribe el código gkssj.")
+                    text_size 20
+
+
+screen minijuego_gkssj():
+    modal True
+    add Solid("#111525")
+    add Solid("#282A3A"):
+        xpos 0
+        ypos 860
+        xsize 1920
+        ysize 220
+    add Solid("#E0A34A"):
+        xpos 0
+        ypos 856
+        xsize 1920
+        ysize 5
+
+    text "GOKU SSJ  VS  FREEZER":
+        xalign 0.5
+        ypos 24
+        size 38
+        color "#FFE77A"
+        outlines [(3, "#101020", 0, 0)]
+
+    text "GOKU":
+        xpos 52
+        ypos 82
+        size 23
+        color "#FFFFFF"
+    bar value goku_vida range 100:
+        xpos 52
+        ypos 116
+        xsize 500
+        ysize 28
+        left_bar Solid("#45D66E")
+        right_bar Solid("#4A2934")
+    text "PODER":
+        xpos 52
+        ypos 153
+        size 18
+        color "#FFE77A"
+    bar value goku_poder range 100:
+        xpos 145
+        ypos 158
+        xsize 407
+        ysize 18
+        left_bar Solid("#63DDF4")
+        right_bar Solid("#273143")
+
+    text "FREEZER":
+        xpos 1368
+        ypos 82
+        size 23
+        color "#FFFFFF"
+    bar value freezer_vida range 100:
+        xpos 1368
+        ypos 116
+        xsize 500
+        ysize 28
+        left_bar Solid("#BD5BE8")
+        right_bar Solid("#4A2934")
+
+    add Transform(
+        imagen_minijuego("goku", goku_accion, goku_frame),
+        ysize=230,
+        xanchor=0.5,
+        yanchor=0.5,
+        xzoom=(-1 if goku_accion in ("idle", "punch", "charge", "blast") and goku_facing < 0 else 1)
+    ):
+        xpos goku_x
+        ypos goku_y
+
+    add Transform(
+        imagen_minijuego("freezer", freezer_accion, freezer_frame),
+        ysize=230,
+        xanchor=0.5,
+        yanchor=0.5,
+        xzoom=(-1 if freezer_accion in ("idle", "punch") and freezer_facing < 0 else 1)
+    ):
+        xpos freezer_x
+        ypos freezer_y
+
+    if mini_proyectil_activo:
+        add Solid("#54E7FF"):
+            xpos mini_proyectil_x - 30
+            ypos mini_proyectil_y - 9
+            xsize 60
+            ysize 18
+        add Solid("#FFFFFF"):
+            xpos mini_proyectil_x - 18
+            ypos mini_proyectil_y - 4
+            xsize 36
+            ysize 8
+
+    frame:
+        xpos 30
+        ypos 970
+        xsize 1860
+        background "#080A12D8"
+        padding (16, 12)
+        text "W A S D: moverte    X: cargar poder (pulsa otra vez para parar)    C: disparar    Z: golpear":
+            size 22
+            color "#FFFFFF"
+
+    text mini_resultado:
+        xalign 0.5
+        ypos 778
+        size 28
+        color "#FFE77A"
+        outlines [(2, "#101020", 0, 0)]
+
+    key ["w", "W"] action Function(minijuego_mover_goku, 0, -42, "up")
+    key ["s", "S"] action Function(minijuego_mover_goku, 0, 42, "down")
+    key ["a", "A"] action Function(minijuego_mover_goku, -42, 0, "left")
+    key ["d", "D"] action Function(minijuego_mover_goku, 42, 0, "right")
+    key ["x", "X"] action Function(minijuego_toggle_carga)
+    key ["c", "C"] action Function(minijuego_disparar)
+    key ["z", "Z"] action Function(minijuego_golpear)
+    key "K_ESCAPE" action Return("salir")
+
+    frame:
+        xpos 1615
+        ypos 865
+        background "#080A12B8"
+        padding (8, 6)
+        vbox:
+            spacing 3
+            textbutton "↑":
+                action Function(minijuego_mover_goku, 0, -42, "up")
+                xalign 0.5
+                text_size 25
+            hbox:
+                spacing 3
+                textbutton "←":
+                    action Function(minijuego_mover_goku, -42, 0, "left")
+                    text_size 25
+                textbutton "↓":
+                    action Function(minijuego_mover_goku, 0, 42, "down")
+                    text_size 25
+                textbutton "→":
+                    action Function(minijuego_mover_goku, 42, 0, "right")
+                    text_size 25
+
+    if not minijuego_activo:
+        frame:
+            xalign 0.5
+            yalign 0.48
+            background "#080A12E8"
+            padding (35, 25)
+            vbox:
+                spacing 14
+                text mini_resultado:
+                    xalign 0.5
+                    size 38
+                    color "#FFE77A"
+                textbutton "Jugar otra vez":
+                    action Function(iniciar_minijuego_gkssj)
+                    xalign 0.5
+                    text_size 24
+                textbutton "Volver al menú":
+                    action Return("salir")
+                    xalign 0.5
+                    text_size 24
+
+    timer 0.16 repeat True action Function(minijuego_tick)
+    timer 0.35 repeat True action Function(minijuego_freezer_tick)
+
 
 screen game_menu(title=None, scroll=None, yinitial=0.0):
 

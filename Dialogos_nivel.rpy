@@ -2,9 +2,45 @@
 # DIALOGOS DE LOS NIVELES - RE: MERCENARY
 # ============================================================
 
-define kazuki = Character("Kazuki", color="#88ccff")
-define lyra = Character("Lyra", color="#ff88cc")
-define gromm = Character("Gromm", color="#008000")
+image kazuki boca_abierta = Transform("images/Kazuki_boca_abierta.png", zoom=0.42)
+image kazuki boca_cerrada = Transform("images/Kazuki_boca_cerreda.png", zoom=0.42)
+image lyra boca_abierta = Transform("images/Lyra_boca_abierta.png", zoom=0.42)
+image lyra boca_cerrada = Transform("images/Lyra_boca_cerrada.png", zoom=0.42)
+image gromm boca_abierta = Transform("images/Gromm_boca_abierta.png", zoom=0.42)
+image gromm boca_cerrada = Transform("images/Gromm_boca_cerrda.png", zoom=0.42)
+
+# Fondos de los dialogos: las vistas ocupan toda la pantalla.
+image nivel1_bg = Transform("images/lvl1_vista.png", xysize=(1920, 1080))
+image nivel2_bg = Transform("images/lvl2_vista.png", xysize=(1920, 1080))
+image nivel3_bg = Transform("images/lvl3_vista.png", xysize=(1920, 1080))
+image nivel4_bg = Transform("images/lvl4_vista.png", xysize=(1920, 1080))
+image nivel5_bg = Transform("images/lvl5_vista.png", xysize=(1920, 1080))
+image nivel6_bg = Transform("images/lvl6_vista.png", xysize=(1920, 1080))
+# El nivel 7 conserva el mapa disponible hasta que haya una vista propia.
+image nivel7_bg = Transform("images/nivel7.png", xysize=(1920, 1080))
+
+init python:
+    def actualizar_bocas_dialogo(personaje_activo=None):
+        posiciones = {
+            "kazuki": left,
+            "lyra": right,
+            "gromm": center,
+        }
+        for personaje, posicion in posiciones.items():
+            boca = "boca_abierta" if personaje == personaje_activo else "boca_cerrada"
+            renpy.show("{} {}".format(personaje, boca), at_list=[posicion])
+
+    def callback_boca(personaje):
+        def actualizar(event, interact=True, **kwargs):
+            if event == "show":
+                actualizar_bocas_dialogo(personaje)
+            elif event == "end":
+                actualizar_bocas_dialogo()
+        return actualizar
+
+define kazuki = Character("Kazuki", color="#88ccff", callback=callback_boca("kazuki"))
+define lyra = Character("Lyra", color="#ff88cc", callback=callback_boca("lyra"))
+define gromm = Character("Gromm", color="#008000", callback=callback_boca("gromm"))
 define senora_oscura = Character("Señora Oscura", color="#8B0000")
 define traidor = Character("Traidor", color="#FF6600")
 
@@ -12,13 +48,13 @@ define traidor = Character("Traidor", color="#FF6600")
 # NIVEL 1: LA INVASION DE LOS GOBLINS (Boss: Ogro)
 # ============================================================
 label dialogo_nivel1_inicio:
-    scene black
+    scene nivel1_bg with fade
     "Hace tres dias, los goblins atacaron y masacraron a los aldeanos de la aldea de Piedra Blanca."
     "Nadie sabe de donde vinieron. Pero nadie duda de que hay algo detras."
 
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     kazuki "Esto es una masacre. Los goblins no suelen atacar de esta forma."
     lyra   "No son solo goblins. Hay esqueletos. Y algo mas."
     gromm  "Por lo visto no solo se han vuelto mas agresivos, sino que mas organizados."
@@ -38,10 +74,10 @@ label dialogo_nivel1_inicio:
     return
 
 label dialogo_nivel1_victoria:
-    scene black
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    scene nivel1_bg with fade
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     "El Ogro cae con un golpe seco. Los goblins restantes huyen despavoridos."
     lyra    "Lo logramos. Pero fue demasiado facil."
     kazuki  "¿Facil? Casi me mata el ogro ese."
@@ -64,12 +100,12 @@ label dialogo_nivel1_victoria:
 # NIVEL 2: LA CRIPTA OLVIDADA (Boss: Esqueleto)
 # ============================================================
 label dialogo_nivel2_inicio:
-    scene black
+    scene nivel2_bg with fade
     "Tras salvar la aldea, el trio se dirige a la Cripta Olvidada."
     "Un cementerio antiguo donde descansan los heroes olvidados por el tiempo."
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     gromm  "Este lugar me da escalofrios. Los muertos no deberian caminar."
     lyra   "Por eso estamos aca. Alguien los esta despertando."
     kazuki "¿Tu crees que sea un nigromante?"
@@ -86,10 +122,10 @@ label dialogo_nivel2_inicio:
     return
 
 label dialogo_nivel2_victoria:
-    scene black
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    scene nivel2_bg with fade
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     "El Esqueleto nigromante se desmorona. Su craneo rueda por el suelo."
     kazuki "Encontre esto entre sus ropas."
     "Kazuki sostiene un medallon con el simbolo del Imperio Oscuro."
@@ -112,12 +148,12 @@ label dialogo_nivel2_victoria:
 # NIVEL 3: EL BOSQUE DE LAS SOMBRAS (Boss: Traidor)
 # ============================================================
 label dialogo_nivel3_inicio:
-    scene black
+    scene nivel3_bg with fade
     "El Bosque de las Sombras era un lugar sagrado para los elfos."
     "Ahora, sus arboles estan negros y sus ramas se retuercen como garras."
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     lyra   "Este bosque... era mi hogar. Antes de que el Imperio lo quemara."
     kazuki "Lo siento, Lyra."
     lyra   "No es tu culpa. Pero encontrar esto asi... es como perderlo dos veces."
@@ -136,10 +172,10 @@ label dialogo_nivel3_inicio:
     return
 
 label dialogo_nivel3_victoria:
-    scene black
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    scene nivel3_bg with fade
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     "El Traidor cae de rodillas. Su mascara se rompe."
     traidor "Miserables... la Señora Oscura... no perdonara esto..."
     kazuki "La Señora Oscura vendra por nosotros, ya lo sabemos."
@@ -166,12 +202,12 @@ label dialogo_nivel3_victoria:
 # NIVEL 4: EL TEMPLO DE LOS CAIDOS (Boss: Caballero Corrompido)
 # ============================================================
 label dialogo_nivel4_inicio:
-    scene black
+    scene nivel4_bg with fade
     "El Templo de los Caidos fue construido para honrar a los heroes del reino."
     "Ahora, sus pasillos estan llenos de trampas y sus salas, de espectros."
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     gromm  "Conozco este lugar. Luche aqui cuando era joven."
     kazuki "¿En serio?"
     gromm  "Si. Fue mi primera batalla como soldado. Perdimos contra el Imperio."
@@ -187,10 +223,10 @@ label dialogo_nivel4_inicio:
     return
 
 label dialogo_nivel4_victoria:
-    scene black
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    scene nivel4_bg with fade
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     "El Caballero Corrompido se desmorona. Su armadura negra cae al suelo."
     "Debajo, hay un hombre viejo. Su rostro es familiar."
     gromm  "¡Por todos los dioses! ¡Es el Capitan Aldric!"
@@ -210,12 +246,12 @@ label dialogo_nivel4_victoria:
 # NIVEL 5: LA FORTALEZA DEL GENERAL (Boss: Señora Oscura Humana)
 # ============================================================
 label dialogo_nivel5_inicio:
-    scene black
+    scene nivel5_bg with fade
     "La Fortaleza del Imperio se alza sobre una colina, rodeada de un foso de fuego."
     "Es el corazon del ejercito enemigo."
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     gromm  "Esta es la fortaleza mas grande que he visto."
     lyra   "La Señora Oscura debe estar en el centro. Con sus tropas de elite."
     kazuki "Entonces iremos directo al centro. Sin escalas."
@@ -241,10 +277,10 @@ label dialogo_nivel5_inicio:
     return
 
 label dialogo_nivel5_victoria:
-    scene black
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    scene nivel5_bg with fade
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     show senora_oscura at center
     "La Señora Oscura, en su forma humana, cae de rodillas. Su capa roja se mancha de sangre."
     senora_oscura "Impresionante... nadie habia llegado tan lejos..."
@@ -256,9 +292,9 @@ label dialogo_nivel5_victoria:
     "La Señora Oscura se transforma. Su piel se vuelve escamas. Sus ojos, fuego."
     "Sus alas se despliegan. Ya no es una mujer. Es una demonia."
     "La Fase 2 ha comenzado."
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     lyra   "¡Kazuki! ¡Tenemos que ir al Abismo!"
     kazuki "¡Vamos! ¡Esto no termina aca!"
     gromm  "¡Que alguien me explique que acaba de pasar!"
@@ -272,12 +308,12 @@ label dialogo_nivel5_victoria:
 # NIVEL 6: EL ABISMO DE LOS CONDENADOS (Boss: Señora Oscura Demonia)
 # ============================================================
 label dialogo_nivel6_inicio:
-    scene black
+    scene nivel6_bg with fade
     "El Abismo de los Condenados es una caverna al pie del volcan."
     "La Señora Oscura ha huido aqui. En su forma demoniaca, es aun mas peligrosa."
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     gromm  "Huele a azufre. Y a muerte."
     lyra   "Este es el lugar. La Señora Oscura esta aqui."
     kazuki "Recuerden el plan. Gromm, aguanta los ataques. Lyra, dispara desde lejos."
@@ -296,10 +332,10 @@ label dialogo_nivel6_inicio:
     return
 
 label dialogo_nivel6_victoria:
-    scene black
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    scene nivel6_bg with fade
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     show senora_oscura at center
     "La Señora Oscura (demonia) cae. Sus alas se quiebran. Pero no esta muerta."
     senora_oscura "¿Crees que puedes matarme? ¡Soy eterna!"
@@ -311,9 +347,9 @@ label dialogo_nivel6_victoria:
     "La Demonia se retuerce. Sus alas se desgarran. Su carne se deshace."
     "De su cuerpo emergen tentaculos. Su forma ya no es humanoide."
     "La Fase 3 ha comenzado. LA SEÑORA OSCURA REVELA SU FORMA FINAL."
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     lyra   "¡Kazuki! ¡Esto no es una demonia! ¡Es algo peor!"
     kazuki "¡Vamos al Trono! ¡Es nuestra ultima oportunidad!"
     gromm  "¡Que alguien me explique que acaba de pasar!"
@@ -327,14 +363,14 @@ label dialogo_nivel6_victoria:
 # NIVEL 7: EL TRONO DE LA SEÑORA OSCURA (Boss: Señora Oscura Tentaculos)
 # ============================================================
 label dialogo_nivel7_inicio:
-    scene black
+    scene nivel7_bg with fade
     "La Sala del Trono. El corazon del Imperio Oscuro."
     "En el trono, algo que ya no puede llamarse humano espera."
     show senora_oscura at center
     senora_oscura "Los esperaba... aunque ya no puedo verlos con ojos humanos..."
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     kazuki "¿Que te has hecho a ti misma?"
     senora_oscura "Me he convertido... en lo que siempre fui... en la PODREDUMBRE misma."
     gromm  "¡No eres una diosa! ¡Eres un monstruo! ¡Y los monstruos caen!"
@@ -353,10 +389,10 @@ label dialogo_nivel7_inicio:
 # NIVEL 7 - VICTORIA 
 # ============================================================
 label dialogo_nivel7_victoria:
-    scene black
-    show kazuki at left
-    show lyra at right
-    show gromm at center
+    scene nivel7_bg with fade
+    show kazuki boca_cerrada at left
+    show lyra boca_cerrada at right
+    show gromm boca_cerrada at center
     "El Monstruo de Tentaculos se desmorona. Su cuerpo vuelve a su forma humana."
     "La Señora Oscura, ahora una anciana debil, yace en el suelo."
     senora_oscura "Lo lograron... al fin... alguien pudo detenerme..."

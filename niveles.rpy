@@ -274,7 +274,7 @@ label nivel7:
     jump comenzar_batalla
 
 label nivel_aleatorio:
-    $ reproducir_musica("Lvl0.wav", fadein=1.0, loop=True)
+    $ reproducir_musica("main.mp3", fadein=1.0, loop=True)
     $ boss_musica_activada = False
     $ boss_spawneado = False
     $ tablero_actual = "nivel0.png"
